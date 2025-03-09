@@ -7,7 +7,8 @@ from .views import (
       SettleBetsView, UserBetHistoryView, CashoutBetView, UserBetReportView, AdminBetReportView,
       AdminDashboardView, BossCashierListView, BossUserListView, BossFinancialReportView,
      ManagerUserListView, ManagerFinancialReportView, CashierFinancialReportView,  UserBalanceView,
-    CashierUserBetsReportView, ManagerUserBetsReportView, UpdateUserView
+    CashierUserBetsReportView, ManagerUserBetsReportView, UpdateUserView, TransferUnitsView,
+     TransactionHistoryView, FinancialReportsView,
 )
 
 urlpatterns = [
@@ -40,5 +41,8 @@ urlpatterns = [
     path("users/", ListUsersView.as_view(), name="list-users"),  # Παράδειγμα
     path("token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),  # ✅ Login με JWT
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),  # ✅ Refresh Token
+    path('transfer/', TransferUnitsView.as_view(), name='transfer_units'),
+    path('transactions/history/', TransactionHistoryView.as_view(), name='transaction-history'),
+    path('financial-reports/', FinancialReportsView.as_view(), name='financial-reports'),
 
 ]

@@ -13,14 +13,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from .permissions import IsAdmin, CanManageManagers, CanManageCashiers, CanManageUsers, IsBoss, IsManager, IsCashier
 from django.http import JsonResponse
-from .models import Bet, UserBalance, CustomUser
+from .models import Bet, UserBalance, CustomUser, Transaction
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 from django.db.models import Q
 from django.db.models import Sum
 from django.utils.timezone import now
-from users.serializers import CustomTokenObtainPairSerializer
+from users.serializers import CustomTokenObtainPairSerializer, FinancialReportSerializer
 import requests
 import os
 
@@ -624,3 +624,83 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 class ProtectedView(APIView):
     def get(self, request):
         return Response({"message": "This is a protected view"})
+    
+class TransferUnitsView(APIView):
+    """
+    Επιτρέπει μεταφορά μονάδων με έλεγχο ρόλων.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        sender = request.user
+        target_username = request.data.get("target_username")
+        amount = request.data.get("amount")
+
+        if not target_username or not amount:
+            raise ValidationError("Απαιτούνται target_username και amount.")
+
+        target_user = get_object_or_404(CustomUser, username=target_username)
+        sender_balance = get_object_or_404(UserBalance, user=sender)
+        target_balance = get_object_or_404(UserBalance, user=target_user)
+
+        # Έλεγχος αν ο χρήστης έχει αρκετές μονάδες
+        if sender_balance.balance < float(amount):
+            raise ValidationError("Μη επαρκές υπόλοιπο για μεταφορά.")
+
+        # Εκτέλεση μεταφοράς
+        sender_balance.balance -= float(amount)
+        target_balance.balance += float(amount)
+        sender_balance.save()
+        target_balance.save()
+
+        # ✅ Αποθήκευση της συναλλαγής στο ιστορικό
+        Transaction.objects.create(sender=sender, receiver=target_user, amount=amount)
+
+        return Response({
+            "message": f"Μεταφέρθηκαν {amount} μονάδες στον {target_user.username}.",
+            "sender_new_balance": sender_balance.balance,
+            "receiver_new_balance": target_balance.balance,
+        })
+
+class TransactionHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        transactions = Transaction.objects.filter(sender=request.user) | Transaction.objects.filter(receiver=request.user)
+        transactions = transactions.order_by('-timestamp')
+
+        history = [
+            {
+                "sender": transaction.sender.username,
+                "receiver": transaction.receiver.username,
+                "amount": transaction.amount,
+                "timestamp": transaction.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+            }
+            for transaction in transactions
+        ]
+
+        return Response({"history": history})
+
+class FinancialReportsView(APIView):
+    permission_classes = [IsAuthenticated]  # Επιτρέπει την πρόσβαση μόνο σε αυθεντικοποιημένους χρήστες
+
+    def get(self, request):
+        print("FinancialReportsView hit!")  # DEBUGGING
+        
+        reports = []
+        users = UserBalance.objects.all()
+
+        for user_balance in users:
+            revenue = user_balance.balance * 1.2  # Παράδειγμα υπολογισμού εσόδων
+            expense = user_balance.balance * 0.5  # Παράδειγμα υπολογισμού εξόδων
+            profit = revenue - expense
+
+            reports.append({
+                "user": user_balance.user.username,
+                "revenue": revenue,
+                "expense": expense,
+                "profit": profit,
+            })
+
+       
+        return Response(reports)

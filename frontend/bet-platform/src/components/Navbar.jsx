@@ -1,17 +1,20 @@
 import { Link } from "react-router-dom";
-import useAuthStore from "../store/authStore";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 const Navbar = () => {
-  const { user, logout } = useAuthStore();
+  const { user, logout, hasRole } = useContext(AuthContext); // ✅ Παίρνουμε το hasRole από το context
 
   return (
-    <nav className="bg-blue-600 text-white p-4 flex justify-between">
-      <h1 className="text-lg font-bold">Bet Platform</h1>
-      
-      <div className="space-x-4">
+    <nav className="bg-blue-600 text-white p-4 flex justify-between items-center">
+      <h1 className="text-lg font-bold">
+        <Link to="/">Bet Platform</Link>
+      </h1>
+
+      <div className="flex space-x-4">
         {user ? (
           <>
-            {user.role === "admin" && (
+            {hasRole(["admin"]) && (
               <>
                 <Link to="/dashboard">Dashboard</Link>
                 <Link to="/manage-users">Διαχείριση Χρηστών</Link>
@@ -19,7 +22,7 @@ const Navbar = () => {
               </>
             )}
 
-            {user.role === "boss" && (
+            {hasRole(["boss"]) && (
               <>
                 <Link to="/dashboard">Dashboard</Link>
                 <Link to="/manage-managers">Διαχείριση Managers</Link>
@@ -27,7 +30,7 @@ const Navbar = () => {
               </>
             )}
 
-            {user.role === "manager" && (
+            {hasRole(["manager"]) && (
               <>
                 <Link to="/dashboard">Dashboard</Link>
                 <Link to="/manage-cashiers">Διαχείριση Ταμιών</Link>
@@ -35,7 +38,7 @@ const Navbar = () => {
               </>
             )}
 
-            {user.role === "cashier" && (
+            {hasRole(["cashier"]) && (
               <>
                 <Link to="/cashier">Ταμείο</Link>
                 <Link to="/manage-users">Οι Χρήστες μου</Link>
@@ -43,19 +46,23 @@ const Navbar = () => {
               </>
             )}
 
-            {user.role === "user" && (
+            {hasRole(["user"]) && (
               <>
                 <Link to="/user/history">Ιστορικό Στοιχημάτων</Link>
                 <Link to="/place-bet">Τοποθέτηση Στοιχήματος</Link>
               </>
             )}
 
-            <button onClick={logout} className="ml-4 px-4 py-2 bg-red-500 rounded">
+            <button 
+              onClick={logout} 
+              className="ml-4 px-4 py-2 bg-red-500 rounded hover:bg-red-700 transition duration-200">
               Logout
             </button>
           </>
         ) : (
-          <Link to="/">Login</Link>
+          <Link to="/" className="px-4 py-2 bg-green-500 rounded hover:bg-green-700 transition duration-200">
+            Login
+          </Link>
         )}
       </div>
     </nav>

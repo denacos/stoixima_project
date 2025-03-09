@@ -1,15 +1,30 @@
 import { Navigate, Outlet } from "react-router-dom";
-import useAuthStore from "../store/authStore";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthProvider";
 
 const RoleProtectedRoute = ({ allowedRoles }) => {
-  const { user } = useAuthStore();
+    const { user, loading } = useContext(AuthContext);
 
-  // Αν δεν υπάρχει χρήστης ή δεν έχει τον απαιτούμενο ρόλο, τον επιστρέφουμε στη σελίδα login
-  if (!user || !allowedRoles.includes(user.role)) {
-    return <Navigate to="/unauthorized" replace />;
-  }
+    console.log("🔄 RoleProtectedRoute - Έλεγχος χρήστη...");
+    console.log("➡ loading:", loading);
+    console.log("➡ user:", user);
 
-  return <Outlet />;
+    if (loading) {
+        return <p>Φόρτωση...</p>;
+    }
+
+    if (!user) {
+        console.log("🚨 Ο χρήστης δεν είναι συνδεδεμένος! Ανακατεύθυνση στο /login...");
+        return <Navigate to="/login" replace />;
+    }
+
+    if (!allowedRoles.includes(user.role)) {
+        console.log("🚫 Ο χρήστης δεν έχει πρόσβαση! Ανακατεύθυνση στο /unauthorized...");
+        return <Navigate to="/unauthorized" replace />;
+    }
+
+    console.log("✅ Ο χρήστης έχει πρόσβαση:", user);
+    return <Outlet />;
 };
 
 export default RoleProtectedRoute;

@@ -26,7 +26,6 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
 
-
 class BetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bet
@@ -56,3 +55,19 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'email', 'role']
+
+
+class TransferUnitsSerializer(serializers.Serializer):
+    target_username = serializers.CharField()
+    amount = serializers.FloatField()
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Το ποσό πρέπει να είναι θετικό.")
+        return value
+
+class FinancialReportSerializer(serializers.Serializer):
+    user = serializers.CharField(source="user.username")
+    revenue = serializers.FloatField()
+    expense = serializers.FloatField()
+    profit = serializers.FloatField()
