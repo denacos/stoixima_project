@@ -1,0 +1,16 @@
+.sports-menu {
+    display: flex;
+    justify-content: space-around;
+    background-color: #004d40;
+    padding: 10px;
+  }
+  .menu-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .menu-btn:hover {
+    text-decoration: underline;
+  }

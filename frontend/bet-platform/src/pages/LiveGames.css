@@ -1,0 +1,42 @@
+.live-games-container {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .live-games-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .live-matches-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .live-matches-table th,
+  .live-matches-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  .live-matches-table th {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .view-match-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .view-match-btn:hover {
+    background-color: #218838;
+  }
+  

@@ -3,12 +3,12 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.authtoken.views import obtain_auth_token  # Για login με token
 from .views import (
     CustomLoginView, CreateUserView, ListUsersView, AdminUserListView, BossManagerListView,
-    ManagerCashierListView, CashierUserListView, get_odds, PlaceBetView,
+    ManagerCashierListView, CashierUserListView, PlaceBetView,
       SettleBetsView, UserBetHistoryView, CashoutBetView, UserBetReportView, AdminBetReportView,
       AdminDashboardView, BossCashierListView, BossUserListView, BossFinancialReportView,
      ManagerUserListView, ManagerFinancialReportView, CashierFinancialReportView,  UserBalanceView,
     CashierUserBetsReportView, ManagerUserBetsReportView, UpdateUserView, TransferUnitsView,
-     TransactionHistoryView, FinancialReportsView,
+     TransactionHistoryView, FinancialReportsView, GetBetSlipView,
 )
 
 urlpatterns = [
@@ -26,8 +26,6 @@ urlpatterns = [
     path('cashier/users/', CashierUserListView.as_view(), name='cashier-users'),
     path('cashier/user-bets/', CashierUserBetsReportView.as_view(), name='cashier-user-bets'),    
     path('cashier/financial-report/', CashierFinancialReportView.as_view(), name='cashier-financial-report'),
-    path("odds/", get_odds, name="get_odds"),
-    path('bets/place/', PlaceBetView.as_view(), name='place-bet'),
     path('bets/settle/', SettleBetsView.as_view(), name='settle-bets'),
     path('bets/history/', UserBetHistoryView.as_view(), name='bet-history'),
     path('bets/cashout/<int:bet_id>/', CashoutBetView.as_view(), name='cashout-bet'),
@@ -44,5 +42,7 @@ urlpatterns = [
     path('transfer/', TransferUnitsView.as_view(), name='transfer_units'),
     path('transactions/history/', TransactionHistoryView.as_view(), name='transaction-history'),
     path('financial-reports/', FinancialReportsView.as_view(), name='financial-reports'),
+    path('bets/slip/', GetBetSlipView.as_view(), name='get-bet-slip'),
+    path('bets/place/', PlaceBetView.as_view(), name='place-bet'),  # ✅ Εξασφάλισε ότι υπάρχει
 
 ]

@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 export const AuthContext = createContext({
     user: null,
@@ -16,14 +16,16 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         console.log("🔄 Εκκίνηση AuthProvider - Έλεγχος localStorage...");
-
+    
         try {
             const storedUser = localStorage.getItem("user");
             const storedToken = localStorage.getItem("authToken");
-
+    
             if (storedUser && storedToken) {
                 const parsedUser = JSON.parse(storedUser);
                 console.log("✅ Ανάκτηση χρήστη από localStorage:", parsedUser);
+                
+                // 🔹 Ενημέρωση του state με το token
                 setUser(parsedUser);
                 setToken(storedToken);
             } else {
@@ -31,10 +33,14 @@ export const AuthProvider = ({ children }) => {
             }
         } catch (error) {
             console.error("❌ Σφάλμα στην ανάκτηση χρήστη από το localStorage:", error);
+        } finally {
+            setTimeout(() => {
+                console.log("✅ Τέλος φόρτωσης...");
+                setLoading(false);
+            }, 1000);
         }
-
-        setLoading(false);
     }, []);
+    ;
 
     const login = (userData, accessToken, refreshToken) => {
         console.log("✅ Χρήστης συνδέθηκε:", userData);
@@ -57,7 +63,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const hasRole = (roles) => {
-        return user && user.role ? roles.includes(user.role) : false;
+        return user?.role ? roles.includes(user.role) : false;
     };
 
     return (
@@ -65,6 +71,11 @@ export const AuthProvider = ({ children }) => {
             {children}
         </AuthContext.Provider>
     );
+};
+
+// ✅ Δημιουργούμε το `useAuth()` hook για ευκολότερη χρήση της αυθεντικοποίησης
+export const useAuth = () => {
+    return useContext(AuthContext);
 };
 
 export default AuthProvider;

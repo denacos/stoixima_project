@@ -155,7 +155,8 @@ REST_FRAMEWORK = {
 # CORS SETTINGS
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # ✅ Επιτρέπει requests από το React frontend
+    "http://localhost:3000",
+     "https://your-production-domain.com"  # ✅ Επιτρέπει requests από το React frontend
 ]
 CORS_ALLOW_CREDENTIALS = True  # ✅ Επιτρέπει αποστολή credentials (π.χ. cookies)
 

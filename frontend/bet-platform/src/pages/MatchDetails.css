@@ -1,0 +1,76 @@
+/* Στυλ για το container */
+.match-details-container {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 900px;
+    margin: 20px auto;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Επικεφαλίδα του αγώνα */
+  .match-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+  }
+  
+  /* Κουμπί επιστροφής */
+  .back-button {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .back-button:hover {
+    background: #218838;
+  }
+  
+  /* Στυλ για τις αγορές */
+  .bet-market {
+    margin-top: 15px;
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .bet-market h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+    color: #007bff;
+  }
+  
+  .bet-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  /* Κουμπιά στοιχημάτων */
+  .bet-button {
+    background: #ffc107;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+  }
+  
+  .bet-button:hover {
+    background: #e0a800;
+  }
+  

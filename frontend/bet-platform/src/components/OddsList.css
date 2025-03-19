@@ -1,0 +1,67 @@
+/* OddsList.css */
+
+.odds-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+    background-color: #1b1b1b;
+    color: white;
+    border-radius: 10px;
+  }
+  
+  .title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .sport-category {
+    margin-bottom: 40px;
+  }
+  
+  .sport-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #00ff99;
+    border-bottom: 2px solid #00ff99;
+    padding-bottom: 5px;
+  }
+  
+  .competition-section {
+    margin-top: 20px;
+  }
+  
+  .competition-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffd700;
+    margin-bottom: 10px;
+  }
+  
+  .odds-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #222;
+  }
+  
+  .odds-table th, .odds-table td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #444;
+  }
+  
+  .odds-table th {
+    background-color: #333;
+    color: #fff;
+  }
+  
+  .odds-table td {
+    background-color: #282828;
+    color: #ddd;
+  }
+  
+  .odds-table tr:hover {
+    background-color: #3a3a3a;
+  }
+  

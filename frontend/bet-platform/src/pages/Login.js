@@ -12,42 +12,45 @@ const Login = () => {
     useEffect(() => {
         if (user) {
             console.log("✅ Ο χρήστης είναι συνδεδεμένος:", user);
-            navigate("/dashboard");
+            navigate("/");;
         }
     }, [user, navigate]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setError(null);
-
+    
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/token/", {
+            const response = await fetch("http://127.0.0.1:8000/api/users/token/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password }),
             });
-
+    
             if (!response.ok) {
                 throw new Error("❌ Λάθος στοιχεία! Δοκιμάστε ξανά.");
             }
-
+    
             const data = await response.json();
-            if (!data.access || !data.refresh || !data.user) {
-                throw new Error("❌ Το API δεν επέστρεψε σωστά δεδομένα χρήστη.");
+            console.log("🔹 API Response:", data); // ✅ Δες αν επιστρέφει σωστά δεδομένα
+    
+            if (!data.access || !data.refresh) {
+                throw new Error("❌ Το API δεν επέστρεψε σωστά τα tokens.");
             }
-
-            // ✅ Αποθήκευση των tokens και χρήστη στο localStorage
-            localStorage.setItem("authToken", data.access);
+    
+            // ✅ Αποθήκευση tokens & χρήστη με σωστά ονόματα
+            localStorage.setItem("token", data.access);  // ⚠️ Αντί για authToken
             localStorage.setItem("refreshToken", data.refresh);
-            localStorage.setItem("user", JSON.stringify(data.user));
-
-            login(data.user, data.access, data.refresh);
+            localStorage.setItem("user", JSON.stringify(data.user || { username }));
+    
+            login(data.user || { username }, data.access, data.refresh);
             navigate("/dashboard");
         } catch (error) {
             console.error("Σφάλμα κατά τη σύνδεση:", error);
             setError(error.message || "❌ Σφάλμα σύνδεσης. Δοκιμάστε ξανά.");
         }
     };
+    
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">

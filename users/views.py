@@ -23,23 +23,42 @@ from django.utils.timezone import now
 from users.serializers import CustomTokenObtainPairSerializer, FinancialReportSerializer
 import requests
 import os
+from django.core.cache import cache
 
 User = get_user_model()
 
-def get_odds(request):
-    API_KEY = os.getenv("ODDS_API_KEY")  # Φόρτωση API Key από .env
-    if not API_KEY:
-        return JsonResponse({"error": "API Key not found"}, status=500)
+class GetAllOddsView(APIView):
+    def get(self, request):
+        API_KEY = os.getenv("ODDS_API_KEY")
+        if not API_KEY:
+            return Response({"error": "API Key not found"}, status=500)
 
-    SPORT = "soccer_epl"  # Παράδειγμα για Premier League
-    url = f"https://api.the-odds-api.com/v4/sports/{SPORT}/odds/?regions=eu&apiKey={API_KEY}"
-    
-    response = requests.get(url)
-    
-    if response.status_code == 200:
-        return JsonResponse(response.json(), safe=False)
-    else:
-        return JsonResponse({"error": f"API request failed - {response.json()}"}, status=response.status_code)
+        cached_odds = cache.get("all_odds")
+        if cached_odds:
+            return Response(cached_odds)
+
+        sports_url = f"https://api.the-odds-api.com/v4/sports/?apiKey={API_KEY}"
+        sports_response = requests.get(sports_url)
+
+        if sports_response.status_code != 200:
+            return Response({"error": "Failed to fetch sports list"}, status=sports_response.status_code)
+
+        sports_data = sports_response.json()
+        all_odds = {}
+
+        for sport in sports_data:
+            sport_key = sport.get("key")
+            odds_url = f"https://api.the-odds-api.com/v4/sports/{sport_key}/odds/?regions=eu&apiKey={API_KEY}"
+            odds_response = requests.get(odds_url)
+
+            if odds_response.status_code == 200:
+                all_odds[sport_key] = odds_response.json()
+            else:
+                all_odds[sport_key] = {"error": f"Failed to fetch odds for {sport_key}"}
+
+        cache.set("all_odds", all_odds, timeout=3600)
+
+        return Response(all_odds)
     
 # 🔹 2️⃣ API για δημιουργία νέων χρηστών
 class CreateUserView(generics.CreateAPIView):
@@ -686,7 +705,7 @@ class FinancialReportsView(APIView):
 
     def get(self, request):
         print("FinancialReportsView hit!")  # DEBUGGING
-        
+
         reports = []
         users = UserBalance.objects.all()
 
@@ -704,3 +723,72 @@ class FinancialReportsView(APIView):
 
        
         return Response(reports)
+    
+class GetSportsView(APIView):
+    def get(self, request):
+        API_KEY = os.getenv("ODDS_API_KEY")
+        if not API_KEY:
+            return Response({"error": "API Key not found"}, status=500)
+
+        sports_url = f"https://api.the-odds-api.com/v4/sports/?apiKey={API_KEY}"
+        response = requests.get(sports_url)
+
+        if response.status_code != 200:
+            return Response({"error": "Failed to fetch sports list"}, status=response.status_code)
+
+        return Response(response.json())
+
+class GetAllSportsView(APIView):
+    def get(self, request):
+        API_KEY = os.getenv("ODDS_API_KEY")  # ✅ Παίρνει το API Key από το .env
+        if not API_KEY:
+            return Response({"error": "API Key not found"}, status=500)
+
+        # ✅ Cache τα δεδομένα για να μην κάνουμε πολλές κλήσεις στο API
+        cached_sports = cache.get("sports_list")
+        if cached_sports:
+            return Response(cached_sports)
+
+        # ✅ Φέρνουμε τα αθλήματα από το The Odds API
+        sports_url = f"https://api.the-odds-api.com/v4/sports/?apiKey={API_KEY}"
+        response = requests.get(sports_url)
+
+        if response.status_code != 200:
+            return Response({"error": "Failed to fetch sports list"}, status=response.status_code)
+
+        sports_data = response.json()
+        cache.set("sports_list", sports_data, timeout=3600)  # Cache για 1 ώρα
+
+        return Response(sports_data)
+    
+class GetBetSlipView(APIView):
+    """ Εμφάνιση κουπονιού πριν την υποβολή του στοιχήματος. """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        bets = Bet.objects.filter(user=user, status="open").order_by('-created_at')
+        serializer = BetSerializer(bets, many=True)
+        return Response(serializer.data)
+
+class PlaceBetView(generics.CreateAPIView):
+    """ Υποβολή στοιχήματος από τον χρήστη. """
+    serializer_class = BetSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        balance = get_object_or_404(UserBalance, user=user)
+        stake = serializer.validated_data['stake']
+
+        # Έλεγχος αν υπάρχει επαρκές υπόλοιπο
+        if balance.balance < stake:
+            raise ValidationError({"error": "Ανεπαρκές υπόλοιπο"})
+
+        # Αφαίρεση υπολοίπου
+        balance.balance -= stake
+        balance.save()
+
+        # Αποθήκευση στοιχήματος
+        serializer.save(user=user)
+

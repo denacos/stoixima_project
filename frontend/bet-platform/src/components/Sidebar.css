@@ -1,0 +1,35 @@
+.sidebar {
+  background-color: #1e1e1e;
+  color: white;
+  padding: 15px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  margin-bottom: 10px;
+}
+
+.sidebar button {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.sidebar button:hover {
+  color: #ffc107;
+}
+
+.sidebar button svg {
+  margin-right: 10px;
+  font-size: 20px;
+}

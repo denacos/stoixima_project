@@ -34,7 +34,8 @@ class BetSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         validated_data['potential_payout'] = validated_data['stake'] * validated_data['odds']
-        return super().create(validated_data),
+        return super().create(validated_data)  # ✅ Σωστό! Επιστρέφει αντικείμενο `Bet`
+
 
 class UserBalanceSerializer(serializers.ModelSerializer):
     class Meta:
