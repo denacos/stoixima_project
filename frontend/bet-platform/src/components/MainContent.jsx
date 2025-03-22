@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthProvider";
+import LiveGames from "../pages/LiveGames"; // ✅ Προσθήκη του LiveGames
 
 const API_URL = process.env.REACT_APP_API_URL; // ✅ API URL από .env
 const API_KEY = process.env.REACT_APP_API_KEY; // ✅ API Key από .env
@@ -42,6 +43,8 @@ const MainContent = ({ selectedSport }) => {
           <li key={league.key}>{league.name}</li>
         ))}
       </ul>
+      {/* ✅ Εμφάνιση των Live Games */}
+      <LiveGames />
     </div>
   );
 };

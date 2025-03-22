@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "../context/AuthProvider";
 import BetButton from "./BetButton";
 import "./BetSlip.css";
@@ -17,16 +17,41 @@ const BetSlip = ({ isOpen, onClose, betSlip, removeBet }) => {
     }
   }, [betSlip, token]);
 
-  const calculateSystemPayout = useCallback((numSelections) => {
-    const subsetOdds = bets.slice(0, numSelections).reduce((acc, bet) => acc * bet.odds, 1);
-    return (subsetOdds * 10).toFixed(2);
+  const hasSameMatchMultipleBets = useMemo(() => {
+    const ids = bets.map((bet) => bet?.match?.id).filter(Boolean);
+    const count = {};
+    for (const id of ids) {
+      count[id] = (count[id] || 0) + 1;
+      if (count[id] > 1) return true;
+    }
+    return false;
   }, [bets]);
+
+  useEffect(() => {
+    if (betType === "parlay" && hasSameMatchMultipleBets) {
+      setBetType("single");
+    }
+  }, [betType, hasSameMatchMultipleBets]);
+
+  const calculateSystemPayout = useCallback(
+    (numSelections) => {
+      const subsetOdds = bets
+        .slice(0, numSelections)
+        .reduce((acc, bet) => acc * bet.odds, 1);
+      return (subsetOdds * 10).toFixed(2);
+    },
+    [bets]
+  );
 
   useEffect(() => {
     if (betType === "system") {
       const newSystems = [];
       for (let i = 2; i <= bets.length; i++) {
-        newSystems.push({ name: `${i} Επιλογές`, odds: calculateSystemPayout(i), stake: "" });
+        newSystems.push({
+          name: `${i} Επιλογές`,
+          odds: calculateSystemPayout(i),
+          stake: "",
+        });
       }
       setSystemBets(newSystems);
     }
@@ -38,9 +63,19 @@ const BetSlip = ({ isOpen, onClose, betSlip, removeBet }) => {
   };
 
   const handleStakeChange = (index, newStake) => {
-    const updatedBets = [...bets];
-    updatedBets[index].stake = newStake;
-    setBets(updatedBets);
+    const updated = [...bets];
+    updated[index].stake = newStake;
+    setBets(updated);
+  };
+
+  const handlePlaceBet = () => {
+    if (betType === "parlay" && hasSameMatchMultipleBets) {
+      alert("❌ Δεν μπορείτε να τοποθετήσετε παρολί με πολλαπλά σημεία από τον ίδιο αγώνα.");
+      return;
+    }
+
+    console.log("📤 Τοποθέτηση στοιχήματος:", bets, "Τύπος:", betType);
+    // TODO: σύνδεση με API
   };
 
   return (
@@ -52,18 +87,30 @@ const BetSlip = ({ isOpen, onClose, betSlip, removeBet }) => {
 
       {!isMinimized && (
         <div className="betslip-body">
+          {/* ✅ Επιλογή τύπου στοιχήματος */}
           <div className="bet-type-selection">
-            <button onClick={() => setBetType("single")} className={betType === "single" ? "active" : ""}>
+            <button
+              onClick={() => setBetType("single")}
+              className={betType === "single" ? "active" : ""}
+            >
               Μονά
             </button>
-            <button onClick={() => setBetType("parlay")} className={betType === "parlay" ? "active" : ""}>
+            <button
+              onClick={() => setBetType("parlay")}
+              className={betType === "parlay" ? "active" : ""}
+              disabled={hasSameMatchMultipleBets}
+            >
               Παρολί
             </button>
-            <button onClick={() => setBetType("system")} className={betType === "system" ? "active" : ""}>
+            <button
+              onClick={() => setBetType("system")}
+              className={betType === "system" ? "active" : ""}
+            >
               Σύστημα
             </button>
           </div>
 
+          {/* ✅ Λίστα στοιχημάτων */}
           <div className="bet-list">
             {bets.length === 0 ? (
               <p className="empty-message">Δεν έχετε επιλέξει στοιχήματα.</p>
@@ -81,34 +128,50 @@ const BetSlip = ({ isOpen, onClose, betSlip, removeBet }) => {
                       step="0.01"
                       placeholder="Ποσό"
                       value={bet.stake || ""}
-                      onChange={(e) => handleStakeChange(index, parseFloat(e.target.value) || "")}
+                      onChange={(e) =>
+                        handleStakeChange(index, parseFloat(e.target.value) || "")
+                      }
                     />
                   </div>
-                  <button className="remove-bet" onClick={() => removeBet(index)}>✖</button>
+                  <button className="remove-bet" onClick={() => removeBet(index)}>
+                    ✖
+                  </button>
                 </div>
               ))
             )}
           </div>
 
+          {/* ✅ Πληροφορίες Παρολί ή Σύστημα */}
           {bets.length > 0 && (
             <div className="betslip-footer">
-              {betType === "parlay" && (
-                <div className="total-payout">
-                  Συνολικό Κέρδος (Παρολί): <strong>{calculateParlayPayout()}</strong>
-                </div>
-              )}
-              {betType === "system" && systemBets.length > 0 && (
-                <div className="system-bets">
-                  <h3>Περισσότερα Πολλαπλά Επιλογών</h3>
-                  {systemBets.map((sys, idx) => (
-                    <div key={idx} className="system-option">
-                      <span>{sys.name}</span>
-                      <span>{sys.odds}</span>
+              {betType === "parlay" && hasSameMatchMultipleBets ? (
+                <p className="warning-text">
+                  ❌ Οι τρέχουσες επιλογές δεν μπορούν να τοποθετηθούν ως παρολί.
+                </p>
+              ) : (
+                <>
+                  {betType === "parlay" && (
+                    <div className="total-payout">
+                      Συνολικό Κέρδος (Παρολί):{" "}
+                      <strong>{calculateParlayPayout()}</strong>
                     </div>
-                  ))}
-                </div>
+                  )}
+
+                  {betType === "system" && systemBets.length > 0 && (
+                    <div className="system-bets">
+                      <h3>Περισσότερα Πολλαπλά Επιλογών</h3>
+                      {systemBets.map((sys, idx) => (
+                        <div key={idx} className="system-option">
+                          <span>{sys.name}</span>
+                          <span>{sys.odds}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <BetButton bets={bets} betType={betType} onClick={handlePlaceBet} />
+                </>
               )}
-              <BetButton bets={bets} />
             </div>
           )}
         </div>
