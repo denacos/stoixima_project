@@ -1,134 +1,31 @@
-/* HomePage.css */
-
-.home-page {
-    background-color: #101c14;
-    color: #e0ffe0;
-    font-family: "Segoe UI", sans-serif;
+.main-layout {
+    display: flex;
+    background-color: #101010;
+    color: white;
     min-height: 100vh;
-    padding-bottom: 3rem;
   }
   
-  /* Header */
-  .top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #1f3b24;
-    padding: 0.7rem 1.5rem;
-    color: #fff;
-    font-size: 1rem;
+  .main-content {
+    flex-grow: 1;
+    padding: 20px;
   }
   
-  .top-bar .logo {
-    font-weight: bold;
-    color: #33cc66;
-    font-size: 1.2rem;
-  }
-  
-  .top-bar .top-nav span {
-    margin: 0 1rem;
-    cursor: pointer;
-    color: #ccc;
-  }
-  
-  .top-bar .top-nav span:hover {
-    color: #33cc66;
-  }
-  
-  .user-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  
-  .user-icon {
-    font-size: 1.2rem;
-  }
-  
-  /* Match slider */
-  .match-slider {
-    display: flex;
-    overflow-x: auto;
-    padding: 1rem;
-    background-color: #13281d;
-    gap: 1rem;
-  }
-  
-  .slider-item {
-    background-color: #1f3b24;
-    border-radius: 8px;
-    padding: 0.8rem;
-    min-width: 220px;
-    flex-shrink: 0;
-    color: #fff;
-  }
-  
-  .slider-item .teams {
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-  }
-  
-  .slider-item .odds {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .odd-btn {
-    background-color: #33cc66;
-    color: #000;
-    padding: 0.3rem 0.6rem;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  
-  .odd-btn:hover {
-    background-color: #2bb45c;
-  }
-  
-  .slider-item .match-time {
-    font-size: 0.8rem;
-    color: #ccc;
-  }
-  
-  /* Title Section */
-  .section-title {
-    padding: 1rem 1.5rem;
-    font-size: 1.3rem;
-    color: #33cc66;
-    border-bottom: 1px solid #1f3b24;
-  }
-  
-  /* Grid */
-  .match-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-  }
-  
-  .match-card {
-    background-color: #1c2e22;
-    padding: 1rem;
+  .header-box {
+    background-color: #0f1f0f;
+    border: 1px solid #2a2a2a;
+    padding: 15px;
+    margin-bottom: 20px;
     border-radius: 6px;
-    color: #fff;
   }
   
-  .match-card .teams {
+  .title {
+    color: #b2ff59;
+    font-size: 20px;
     font-weight: bold;
-    margin-bottom: 0.5rem;
+    margin-bottom: 10px;
   }
   
-  .match-card .odds {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .match-card .match-time {
-    font-size: 0.85rem;
-    color: #ccc;
+  .league-section {
+    margin-top: 20px;
   }
   

@@ -1,48 +1,33 @@
-import React, { useState, useEffect } from "react";
-import { FaFutbol, FaBasketballBall, FaFootballBall, FaBaseballBall, FaHockeyPuck, FaTableTennis, FaVolleyballBall } from "react-icons/fa";
+import React from "react";
 import "./Sidebar.css";
+import { FaFutbol, FaBasketballBall, FaVolleyballBall, FaTableTennis, FaFootballBall, FaRunning, FaSwimmer, FaSkiing, FaBiking, FaDice, FaThList } from "react-icons/fa";
 
-const API_KEY = process.env.REACT_APP_API_KEY;
-const API_URL = process.env.REACT_APP_API_URL;
+const sports = [
+  { name: "Ποδόσφαιρο", icon: <FaFutbol /> },
+  { name: "Μπάσκετ", icon: <FaBasketballBall /> },
+  { name: "Βόλεϊ", icon: <FaVolleyballBall /> },
+  { name: "Πινγκ πονγκ", icon: <FaTableTennis /> },
+  { name: "Αμερ. Ποδόσφαιρο", icon: <FaFootballBall /> },
+  { name: "Στίβος", icon: <FaRunning /> },
+  { name: "Κολύμβηση", icon: <FaSwimmer /> },
+  { name: "Σκι", icon: <FaSkiing /> },
+  { name: "Ποδηλασία", icon: <FaBiking /> },
+  { name: "Καζίνο", icon: <FaDice /> },
+];
 
-const sportIcons = {
-  Soccer: <FaFutbol />, 
-  Basketball: <FaBasketballBall />,
-  "American Football": <FaFootballBall />,
-  Baseball: <FaBaseballBall />,
-  Hockey: <FaHockeyPuck />,
-  Tennis: <FaTableTennis />,
-  Volleyball: <FaVolleyballBall />,
-};
-
-const Sidebar = ({ onSelectSport }) => {
-  const [sports, setSports] = useState([]);
-
-  useEffect(() => {
-    fetch(`${API_URL}/sports?apiKey=${API_KEY}`)
-      .then((res) => res.json())
-      .then((data) => {
-        const uniqueSports = [...new Set(data.map((sport) => sport.group))];
-        setSports(uniqueSports);
-      })
-      .catch((error) => console.error("Error fetching sports:", error));
-  }, []);
-
+const Sidebar = () => {
   return (
     <div className="sidebar">
-      <h2>Δημοφιλή</h2>
-      <ul>
-        {sports.length > 0 ? (
-          sports.map((sport, index) => (
-            <li key={index} className="sidebar-item">
-              <button onClick={() => onSelectSport(sport)}>
-                {sportIcons[sport] || <FaFutbol />} {sport}
-              </button>
-            </li>
-          ))
-        ) : (
-          <p>Φόρτωση...</p>
-        )}
+      <div className="sidebar-header">
+        <FaThList className="sidebar-icon" /> ΠΛΗΡΗΣ ΛΙΣΤΑ
+      </div>
+      <ul className="sidebar-sports">
+        {sports.map((sport, index) => (
+          <li key={index} className="sidebar-item">
+            <span className="sidebar-icon">{sport.icon}</span>
+            <span className="sidebar-label">{sport.name}</span>
+          </li>
+        ))}
       </ul>
     </div>
   );

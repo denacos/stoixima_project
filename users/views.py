@@ -11,6 +11,7 @@ from rest_framework.permissions import BasePermission
 from rest_framework.permissions import IsAdminUser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from .permissions import IsAdmin, CanManageManagers, CanManageCashiers, CanManageUsers, IsBoss, IsManager, IsCashier
 from django.http import JsonResponse
 from .models import Bet, UserBalance, CustomUser, Transaction
@@ -21,11 +22,225 @@ from django.db.models import Q
 from django.db.models import Sum
 from django.utils.timezone import now
 from users.serializers import CustomTokenObtainPairSerializer, FinancialReportSerializer
+from django.views.decorators.csrf import csrf_exempt
 import requests
+import traceback
 import os
 from django.core.cache import cache
+import json
+
 
 User = get_user_model()
+
+@csrf_exempt
+def fetch_betsapi_sports(request):
+    api_key = os.environ.get("BETS_API_KEY")
+    url = f"https://api.betsapi.com/v1/bet365/sports?token={api_key}"
+
+    try:
+        response = requests.get(url)
+        data = response.json()
+        return JsonResponse(data, safe=False)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+def get_live_matches(request):
+    token = "196435-mG6nm6l8Jt1eiH"
+    url = f"https://api.betsapi.com/v1/bet365/inplay?token={token}"
+
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        print("📦 RAW DATA:", json.dumps(data, indent=2))
+
+        results = data.get("results", [])
+
+        matches = []
+
+        for group in results:
+            if not isinstance(group, list):
+                continue
+
+            for match in group:
+                match_id = match.get("ID") or match.get("id")
+                sport_name = match.get("NA", "Unknown")
+
+                matches.append({
+                    "id": match_id,
+                    "type": match.get("type"),
+                    "sport": sport_name,
+                    "league": match.get("L3", ""),  # π.χ. Argentina Cup
+                    "info": match.get("MR", "")[:80],
+                    "header": match.get("HM", "")[:80],
+                })
+
+        print(f"✅ Final parsed matches: {len(matches)}")
+
+        return JsonResponse({"success": True, "count": len(matches), "matches": matches})
+
+    except Exception as e:
+        print("❌ ERROR:", str(e))
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+@csrf_exempt
+def get_structured_live_matches(request):
+    token = os.getenv("BETS_API_KEY")
+    url = f"https://api.betsapi.com/v1/bet365/inplay?token={token}"
+
+    try:
+        response = requests.get(url)
+        data = response.json()
+        results = data.get("results", [])
+
+        leagues = {}
+
+        for group in results:
+            if not isinstance(group, list):
+                continue
+            for match in group:
+                league_name = match.get("L3", "Άγνωστη Διοργάνωση")
+                home = match.get("T1", "Ομάδα Α")
+                away = match.get("T2", "Ομάδα Β")
+                score = match.get("SS", "-")
+                time = match.get("TT", "--:--")
+
+                match_obj = {
+                    "home_team": home,
+                    "away_team": away,
+                    "score": score,
+                    "time": time,
+                    "match_id": match.get("ID"),
+                    "odds": {
+                        "1": 1.80,  # placeholder
+                        "X": 3.40,
+                        "2": 4.50
+                    }
+                }
+
+                if league_name not in leagues:
+                    leagues[league_name] = []
+                leagues[league_name].append(match_obj)
+
+        structured = [
+            {"league": league, "matches": matches}
+            for league, matches in leagues.items()
+        ]
+
+        return JsonResponse(structured, safe=False)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+class PregameStructuredView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        sport_id = request.GET.get("sport_id", 1)
+        token = os.getenv("BETS_API_KEY")  # ✅ ή βάλτο σκληρά για δοκιμές
+
+        url = f"https://api.betsapi.com/v1/bet365/upcoming?sport_id={sport_id}&token={token}"
+
+        try:
+            response = requests.get(url)
+            if response.status_code != 200:
+                return Response({"error": f"BetsAPI returned status {response.status_code}"}, status=404)
+
+            events = response.json().get("results", [])
+            structured = {}
+
+            for event in events:
+                league_name = event.get("league", "")
+                country = event.get("cc", "Άγνωστη Χώρα")
+
+                if country not in structured:
+                    structured[country] = []
+
+                # Προσθέτουμε μόνο αν δεν υπάρχει ήδη το πρωτάθλημα
+                if league_name and not any(lg["name"] == league_name for lg in structured[country]):
+                    structured[country].append({
+                        "id": event.get("league_id", event.get("id")),
+                        "name": league_name,
+                    })
+
+            return Response(structured, status=200)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+    
+class PregameMatchesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        sport_id = request.GET.get("sport_id", "1")  # default: ποδόσφαιρο
+        token = os.getenv("BETS_API_KEY")
+        url = f"https://api.betsapi.com/v1/bet365/upcoming?sport_id={sport_id}&token={token}"
+
+        try:
+            response = requests.get(url)
+            data = response.json()
+            matches = data.get("results", [])
+            return Response(matches)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+class PregameOddsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, match_id):
+        token = os.getenv("BETS_API_KEY")
+        url = f"https://api.betsapi.com/v1/bet365/prematch?FI={match_id}&token={token}"
+
+        try:
+            response = requests.get(url)
+            data = response.json()
+            odds = data.get("results", [])
+            return Response(odds)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+        
+
+class PregameLeaguesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        sport_id = request.query_params.get("sport_id")
+        if not sport_id:
+            return Response({"error": "Missing sport_id"}, status=400)
+
+        token = os.environ.get("BETS_API_KEY")
+        url = f"https://api.betsapi.com/v1/bet365/leagues?sport_id={sport_id}&token={token}"
+        
+        try:
+            r = requests.get(url)
+            data = r.json()
+            if data.get("success", 1) == 0:
+                return Response({"error": f"BetsAPI Error: {data.get('msg', 'Unknown error')}"}, status=404)
+            return Response(data.get("results", []))
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+class PregameMatchesSimpleView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        sport_id = request.query_params.get("sport_id", "1")
+        token = os.environ.get("BETS_API_TOKEN")
+
+        try:
+            response = requests.get(
+                f"https://betsapi.com/api/v1/bet365/upcoming",
+                params={"sport_id": sport_id, "token": token}
+            )
+
+            if response.status_code == 200:
+                return Response(response.json().get("results", []))
+            else:
+                return Response({"error": f"BetsAPI Error: {response.status_code}"}, status=404)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
 
 class GetAllOddsView(APIView):
     def get(self, request):

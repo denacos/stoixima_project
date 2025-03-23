@@ -39,12 +39,12 @@ const Login = () => {
             }
     
             // ✅ Αποθήκευση tokens & χρήστη με σωστά ονόματα
-            localStorage.setItem("token", data.access);  // ⚠️ Αντί για authToken
+            localStorage.setItem("access", data.access);  // 🟢 Σωστό key για axiosInstance
             localStorage.setItem("refreshToken", data.refresh);
             localStorage.setItem("user", JSON.stringify(data.user || { username }));
     
             login(data.user || { username }, data.access, data.refresh);
-            navigate("/dashboard");
+            navigate("/");
         } catch (error) {
             console.error("Σφάλμα κατά τη σύνδεση:", error);
             setError(error.message || "❌ Σφάλμα σύνδεσης. Δοκιμάστε ξανά.");

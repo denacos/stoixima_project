@@ -6,73 +6,53 @@ const API_KEY = process.env.REACT_APP_API_KEY;
 const API_URL = process.env.REACT_APP_API_URL;
 
 const MatchDetails = () => {
-  const { matchId } = useParams();
-  const [match, setMatch] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const { leagueKey } = useParams();
   const navigate = useNavigate();
+  const [matches, setMatches] = useState([]);
 
   useEffect(() => {
-    if (!matchId) return;
-    
-    setLoading(true);
-    fetch(`${API_URL}/sports/soccer/odds?apiKey=${API_KEY}&regions=us&markets=h2h,spreads,totals`)
+    fetch(`${API_URL}/bet365/upcoming?token=${API_KEY}&league_id=${leagueKey}`)
       .then((res) => res.json())
       .then((data) => {
-        const foundMatch = data.find((m) => m.id === matchId);
-        setMatch(foundMatch || null);
+        const results = data.results || [];
+        setMatches(results);
       })
-      .catch((error) => console.error("Error fetching match details:", error))
-      .finally(() => setLoading(false));
-  }, [matchId]);
+      .catch((err) => {
+        console.error("❌ Error fetching matches:", err);
+      });
+  }, [leagueKey]);
 
-  if (loading) return <p>Φόρτωση...</p>;
-  if (!match) return <p>Δεν βρέθηκαν δεδομένα για τον αγώνα</p>;
-
-  const bookmaker = match.bookmakers[0]; // Επιλέγουμε μόνο έναν bookmaker
-  if (!bookmaker) return <p>Δεν υπάρχουν διαθέσιμες αποδόσεις</p>;
-
-  const h2hMarket = bookmaker.markets.find((m) => m.key === "h2h");
-  const spreadsMarket = bookmaker.markets.find((m) => m.key === "spreads");
-  const totalsMarket = bookmaker.markets.find((m) => m.key === "totals");
+  const handleMatchClick = (matchId) => {
+    navigate(`/pregame-odds/${matchId}`);
+  };
 
   return (
     <div className="match-details-container">
       <button onClick={() => navigate(-1)} className="back-button">🔙 Πίσω</button>
-      <h2 className="match-title">{match.home_team} vs {match.away_team}</h2>
-      <p className="match-time">Ημερομηνία: {new Date(match.commence_time).toLocaleString()}</p>
+      <h2 className="match-title">⚽ Αγώνες Διοργάνωσης</h2>
 
-      <div className="bet-section">
-        <h3>Τελικό Αποτέλεσμα</h3>
-        <div className="bet-options">
-          {h2hMarket?.outcomes.map((outcome) => (
-            <button key={outcome.name} className="bet-button">
-              {outcome.name} ({outcome.price})
-            </button>
+      {matches.length === 0 ? (
+        <p>⏳ Φόρτωση αγώνων...</p>
+      ) : (
+        <ul style={{ padding: 0 }}>
+          {matches.map((match) => (
+            <li
+              key={match.id}
+              onClick={() => handleMatchClick(match.id)}
+              style={{
+                cursor: "pointer",
+                padding: "10px",
+                backgroundColor: "#222",
+                color: "white",
+                marginBottom: "10px",
+                borderRadius: "5px",
+              }}
+            >
+              {match.home.name} vs {match.away.name}
+            </li>
           ))}
-        </div>
-      </div>
-
-      <div className="bet-section">
-        <h3>Χάντικαπ</h3>
-        <div className="bet-options">
-          {spreadsMarket?.outcomes.map((outcome) => (
-            <button key={outcome.name} className="bet-button">
-              {outcome.name} {outcome.point} ({outcome.price})
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="bet-section">
-        <h3>Over / Under</h3>
-        <div className="bet-options">
-          {totalsMarket?.outcomes.map((outcome) => (
-            <button key={outcome.name} className="bet-button">
-              {outcome.name} {outcome.point} ({outcome.price})
-            </button>
-          ))}
-        </div>
-      </div>
+        </ul>
+      )}
     </div>
   );
 };

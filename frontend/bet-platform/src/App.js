@@ -10,11 +10,12 @@ import Transactions from "./pages/Transactions";
 import UserSettings from "./pages/UserSettings";
 import LiveGames from "./pages/LiveGames";
 import Casino from "./pages/Casino";
-import LeaguesPage from "./pages/LeaguesPage";
 import MatchesPage from "./pages/MatchesPage";
 import MatchDetails from "./pages/MatchDetails";
 import BetSlip from "./components/BetSlip";
 import HomePage from "./pages/HomePage"; // ✅ Προσθήκη HomePage
+import AllMatchesPage from "./pages/AllMatchesPage"; // ✅ Προσθήκη AllMatchesPage
+import PregameOddsPage from "./pages/PregameOddsPage"; // ✅ Νέα σελίδα για αποδόσεις
 import "./styles/GlobalStyles.css";
 
 const App = () => {
@@ -52,26 +53,19 @@ const App = () => {
 
 const AuthenticatedRoutes = ({ addBet }) => {
   const { user } = useAuth();
-  const [selectedSport, setSelectedSport] = useState(null);
 
   if (!user) {
     return <Login />;
   }
 
   return (
-    <Layout onSelectSport={setSelectedSport}>
-      <div className="main-content">
-        {/* ✅ Εμφάνιση της HomePage ως προεπιλογή */}
-        {!selectedSport ? (
-          <HomePage />
-        ) : (
-          <LeaguesPage sportKey={selectedSport} addBet={addBet} />
-        )}
-      </div>
-
+    <Layout>
       <Routes>
+        <Route path="/" element={<HomePage />} /> {/* ✅ Κάνει το "/" να οδηγεί στο HomePage */}
+        <Route path="/all-matches" element={<AllMatchesPage />} /> {/* ✅ Σελίδα για όλους τους pregame αγώνες */}
         <Route path="/matches/:leagueKey" element={<MatchesPage addBet={addBet} />} />
         <Route path="/match/:matchId" element={<MatchDetails />} />
+        <Route path="/pregame-odds/:matchId" element={<PregameOddsPage />} /> {/* ✅ Νέα δυναμική διαδρομή */}
 
         {user?.role === "user" && (
           <>

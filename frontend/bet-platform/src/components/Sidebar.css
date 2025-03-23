@@ -1,7 +1,20 @@
 .sidebar {
+  width: 250px;
   background-color: #1e1e1e;
   color: white;
-  padding: 15px;
+  padding: 20px;
+  height: 100vh;
+  overflow-y: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.sidebar h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #9de167;
 }
 
 .sidebar ul {
@@ -11,25 +24,16 @@
 
 .sidebar li {
   margin-bottom: 10px;
-}
-
-.sidebar button {
+  font-size: 14px;
   display: flex;
   align-items: center;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 16px;
   cursor: pointer;
-  width: 100%;
-  text-align: left;
 }
 
-.sidebar button:hover {
-  color: #ffc107;
+.sidebar li:hover {
+  color: #9de167;
 }
 
-.sidebar button svg {
+.sidebar li svg {
   margin-right: 10px;
-  font-size: 20px;
 }
