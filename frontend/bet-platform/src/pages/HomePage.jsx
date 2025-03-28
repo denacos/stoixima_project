@@ -1,101 +1,100 @@
 import React, { useEffect, useState } from "react";
-import axiosInstance from "../api/axiosInstance";
-import Sidebar from "../components/Sidebar";
-import { useNavigate } from "react-router-dom";
-import "./HomePage.css";
+import axios from "axios";
+
+const sportIcons = {
+  "Soccer": "⚽",
+  "Basketball": "🏀",
+  "Tennis": "🎾",
+  "Volleyball": "🏐",
+  "Ice Hockey": "🏒",
+  "Baseball": "⚾",
+  "American Football": "🏈",
+  "Cricket": "🏏",
+  "eSports": "🎮",
+  "Boxing": "🥊",
+  "Handball": "🤾",
+};
 
 const HomePage = () => {
-  const [selectedSportId, setSelectedSportId] = useState(1); // Default: Soccer
-  const [leagues, setLeagues] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [liveData, setLiveData] = useState([]);
+  const [selectedSport, setSelectedSport] = useState(null);
 
   useEffect(() => {
-    fetchPregameLeagues(selectedSportId);
-  }, [selectedSportId]);
+    const fetchData = async () => {
+      try {
+        const res = await axios.get("/api/live-matches-structured/");
+        setLiveData(res.data);
+        if (res.data.length > 0) {
+          setSelectedSport(res.data[0].sport); // default to first sport
+        }
+      } catch (err) {
+        console.error("Failed to fetch live matches:", err);
+      }
+    };
+    fetchData();
+  }, []);
 
-  const fetchPregameLeagues = async (sportId) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axiosInstance.get(`/pregame-leagues/?sport_id=${sportId}`);
-      setLeagues(response.data);
-    } catch (err) {
-      console.error("❌ Σφάλμα φόρτωσης pregame leagues:", err);
-      setError("Αποτυχία φόρτωσης διοργανώσεων.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleShowAllMatches = () => {
-    navigate(`/all-matches?sport_id=${selectedSportId}`);
-  };
-
-  const handleLeagueClick = (leagueKey) => {
-    navigate(`/matches/${leagueKey}`);
-  };
+  const sports = Array.from(new Set(liveData.map(g => g.sport)));
+  const filtered = liveData.filter(g => g.sport === selectedSport);
 
   return (
-    <div style={{ display: "flex" }}>
-      <Sidebar onSelectSport={(id) => setSelectedSportId(id)} />
-      <div
-        className="homepage-container"
-        style={{
-          marginLeft: "250px",
-          padding: "20px",
-          width: "100%",
-          backgroundColor: "#f5f5f5",
-          minHeight: "100vh",
-        }}
-      >
-        <h2 className="homepage-title" style={{ color: "#9de167" }}>
-          📍 Pregame Διοργανώσεις
-        </h2>
-
-        <button
-          onClick={handleShowAllMatches}
-          style={{
-            marginBottom: "20px",
-            padding: "10px 16px",
-            backgroundColor: "#33cc33",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
-          Εμφάνιση Όλων των Αγώνων
-        </button>
-
-        {loading && <p>⏳ Φόρτωση διοργανώσεων...</p>}
-        {error && <p style={{ color: "red" }}>{error}</p>}
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "12px" }}>
-          {leagues.map((league) => (
-            <div
-              key={league.key}
-              onClick={() => handleLeagueClick(league.key)}
-              style={{
-                backgroundColor: "#292929",
-                color: "#e2e2e2",
-                padding: "10px",
-                borderRadius: "6px",
-                cursor: "pointer",
-                transition: "0.3s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#444")}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#292929")}
-            >
-              <strong>{league.name}</strong>
-              <div style={{ fontSize: "13px", marginTop: 4 }}>{league.country}</div>
-            </div>
-          ))}
-        </div>
+    <div className="p-4 bg-[#111] text-white min-h-screen">
+      {/* Sport selector */}
+      <div className="flex gap-2 mb-6 overflow-x-auto">
+        {sports.map((sport) => (
+          <button
+            key={sport}
+            onClick={() => setSelectedSport(sport)}
+            className={`px-4 py-1 rounded-full text-sm font-medium border ${
+              selectedSport === sport ? "bg-green-600 text-white" : "bg-gray-800 text-gray-300"
+            }`}
+          >
+            {sportIcons[sport] || "🎯"} {sport}
+          </button>
+        ))}
       </div>
+
+      {filtered.length === 0 ? (
+        <p className="text-center text-gray-400">Δεν υπάρχουν αγώνες.</p>
+      ) : (
+        filtered.map((group, idx) => (
+          <div key={idx} className="mb-8">
+            <div className="text-green-400 text-sm font-semibold mb-2 border-b border-gray-700 pb-1">
+              {group.league}
+            </div>
+            <table className="w-full text-sm text-center">
+              <thead className="text-gray-400">
+                <tr>
+                  <th className="py-1">Ομάδες</th>
+                  <th>Σκορ</th>
+                  <th>Χρόνος</th>
+                  <th>1</th>
+                  <th>X</th>
+                  <th>2</th>
+                </tr>
+              </thead>
+              <tbody>
+                {group.matches.map((match, i) => (
+                  <tr
+                    key={i}
+                    className="border-b border-gray-800 hover:bg-gray-900 transition"
+                  >
+                    <td className="py-1">{match.home_team} vs {match.away_team}</td>
+                    <td>{match.score}</td>
+                    <td>{match.time}</td>
+                    <td className="text-yellow-400">{match.odds["1"]}</td>
+                    <td className="text-yellow-400">{match.odds["X"]}</td>
+                    <td className="text-yellow-400">{match.odds["2"]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))
+      )}
     </div>
   );
 };
 
 export default HomePage;
+

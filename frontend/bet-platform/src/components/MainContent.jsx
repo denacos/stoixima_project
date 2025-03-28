@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthProvider";
+import { useAuth } from "../../context/AuthProvider";
 import LiveGames from "../pages/LiveGames"; // ✅ Προσθήκη του LiveGames
 
 const API_URL = process.env.REACT_APP_API_URL; // ✅ API URL από .env

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { AuthProvider, useAuth } from "./context/AuthProvider";
+import { useAuth } from "./context/AuthProvider";
+import { AuthProvider } from "./context/AuthProvider";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
@@ -16,7 +17,11 @@ import BetSlip from "./components/BetSlip";
 import HomePage from "./pages/HomePage"; // ✅ Προσθήκη HomePage
 import AllMatchesPage from "./pages/AllMatchesPage"; // ✅ Προσθήκη AllMatchesPage
 import PregameOddsPage from "./pages/PregameOddsPage"; // ✅ Νέα σελίδα για αποδόσεις
+import WalletPage from "./pages/WalletPage";
+import PreferencesPage from "./pages/PreferencesPage";
+import ChatPage from "./pages/ChatPage";
 import "./styles/GlobalStyles.css";
+
 
 const App = () => {
   const [bets, setBets] = useState([]);
@@ -74,6 +79,9 @@ const AuthenticatedRoutes = ({ addBet }) => {
             <Route path="/bets" element={<UserBets />} />
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/settings" element={<UserSettings />} />
+            <Route path="/wallet" element={<WalletPage />} />
+            <Route path="/preferences" element={<PreferencesPage />} />
+            <Route path="/chat" element={<ChatPage />} />
           </>
         )}
         {user?.role === "cashier" && <Route path="/cashier" element={<Dashboard />} />}

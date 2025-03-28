@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "../context/AuthProvider";
-import BetButton from "./BetButton";
-import "./BetSlip.css";
+import BetButton from './ui/BetButton';
+
 
 const BetSlip = ({ isOpen, onClose, betSlip, removeBet }) => {
   const { token } = useAuth();

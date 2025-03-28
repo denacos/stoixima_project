@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthProvider";
+import { useAuth } from "../../context/AuthProvider";
 
 const API_URL = process.env.REACT_APP_ODDS_API_URL; // URL του The Odds API
 const API_KEY = process.env.REACT_APP_ODDS_API_KEY; // API Key του The Odds API

@@ -1,5 +1,5 @@
 import React from "react";
-import "./Sidebar.css";
+
 import { FaFutbol, FaBasketballBall, FaVolleyballBall, FaTableTennis, FaFootballBall, FaRunning, FaSwimmer, FaSkiing, FaBiking, FaDice, FaThList } from "react-icons/fa";
 
 const sports = [

@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.authtoken.views import obtain_auth_token  # Για login με token
+from .views import ChangePasswordView
 from .views import (
     CustomLoginView, CreateUserView, ListUsersView, AdminUserListView, BossManagerListView,
     ManagerCashierListView, CashierUserListView, PlaceBetView,
@@ -8,7 +9,7 @@ from .views import (
       AdminDashboardView, BossCashierListView, BossUserListView, BossFinancialReportView,
      ManagerUserListView, ManagerFinancialReportView, CashierFinancialReportView,  UserBalanceView,
     CashierUserBetsReportView, ManagerUserBetsReportView, UpdateUserView, TransferUnitsView,
-     TransactionHistoryView, FinancialReportsView, GetBetSlipView,
+     TransactionHistoryView, FinancialReportsView, GetBetSlipView, CurrentUserView,
 )
 
 urlpatterns = [
@@ -44,5 +45,6 @@ urlpatterns = [
     path('financial-reports/', FinancialReportsView.as_view(), name='financial-reports'),
     path('bets/slip/', GetBetSlipView.as_view(), name='get-bet-slip'),
     path('bets/place/', PlaceBetView.as_view(), name='place-bet'),  # ✅ Εξασφάλισε ότι υπάρχει
-
+    path('me/', CurrentUserView.as_view(), name='current-user'),
+    path("change-password/", ChangePasswordView.as_view(), name="change-password"),
 ]

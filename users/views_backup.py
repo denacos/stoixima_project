@@ -35,7 +35,7 @@ User = get_user_model()
 @csrf_exempt
 def fetch_betsapi_sports(request):
     api_key = os.environ.get("BETS_API_KEY")
-    url = f"https://api.betsapi.com/v1/bet365/sports?token={api_key}"
+    url = f"https://api.b365api.com/v1/bet365/sports?token={api_key}"
 
     try:
         response = requests.get(url)
@@ -47,7 +47,7 @@ def fetch_betsapi_sports(request):
 
 def get_live_matches(request):
     token = "196435-mG6nm6l8Jt1eiH"
-    url = f"https://api.betsapi.com/v1/bet365/inplay?token={token}"
+    url = f"https://api.b365api.com/v1/bet365/inplay?token={token}"
 
     try:
         response = requests.get(url)
@@ -87,7 +87,7 @@ def get_live_matches(request):
 @csrf_exempt
 def get_structured_live_matches(request):
     token = os.getenv("BETS_API_KEY")
-    url = f"https://api.betsapi.com/v1/bet365/inplay?token={token}"
+    url = f"https://api.b365api.com/v1/bet365/inplay?token={token}"
 
     try:
         response = requests.get(url)
@@ -140,7 +140,7 @@ class PregameStructuredView(APIView):
         sport_id = request.GET.get("sport_id", 1)
         token = os.getenv("BETS_API_KEY")  # ✅ ή βάλτο σκληρά για δοκιμές
 
-        url = f"https://api.betsapi.com/v1/bet365/upcoming?sport_id={sport_id}&token={token}"
+        url = f"https://api.b365api.com/v1/bet365/upcoming?sport_id={sport_id}&token={token}"
 
         try:
             response = requests.get(url)
@@ -175,7 +175,7 @@ class PregameMatchesView(APIView):
     def get(self, request):
         sport_id = request.GET.get("sport_id", "1")  # default: ποδόσφαιρο
         token = os.getenv("BETS_API_KEY")
-        url = f"https://api.betsapi.com/v1/bet365/upcoming?sport_id={sport_id}&token={token}"
+        url = f"https://api.b365api.com/v1/bet365/upcoming?sport_id={sport_id}&token={token}"
 
         try:
             response = requests.get(url)
@@ -190,7 +190,7 @@ class PregameOddsView(APIView):
 
     def get(self, request, match_id):
         token = os.getenv("BETS_API_KEY")
-        url = f"https://api.betsapi.com/v1/bet365/prematch?FI={match_id}&token={token}"
+        url = f"https://api.b365api.com/v1/bet365/prematch?FI={match_id}&token={token}"
 
         try:
             response = requests.get(url)
@@ -210,7 +210,7 @@ class PregameLeaguesView(APIView):
             return Response({"error": "Missing sport_id"}, status=400)
 
         token = os.environ.get("BETS_API_KEY")
-        url = f"https://api.betsapi.com/v1/bet365/leagues?sport_id={sport_id}&token={token}"
+        url = f"https://api.b365api.com/v1/bet365/leagues?sport_id={sport_id}&token={token}"
         
         try:
             r = requests.get(url)
@@ -230,7 +230,7 @@ class PregameMatchesSimpleView(APIView):
 
         try:
             response = requests.get(
-                f"https://betsapi.com/api/v1/bet365/upcoming",
+                f"https://api.b365api.com/api/v1/bet365/upcoming",
                 params={"sport_id": sport_id, "token": token}
             )
 
@@ -242,38 +242,7 @@ class PregameMatchesSimpleView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
-class GetAllOddsView(APIView):
-    def get(self, request):
-        API_KEY = os.getenv("ODDS_API_KEY")
-        if not API_KEY:
-            return Response({"error": "API Key not found"}, status=500)
-
-        cached_odds = cache.get("all_odds")
-        if cached_odds:
-            return Response(cached_odds)
-
-        sports_url = f"https://api.the-odds-api.com/v4/sports/?apiKey={API_KEY}"
-        sports_response = requests.get(sports_url)
-
-        if sports_response.status_code != 200:
-            return Response({"error": "Failed to fetch sports list"}, status=sports_response.status_code)
-
-        sports_data = sports_response.json()
-        all_odds = {}
-
-        for sport in sports_data:
-            sport_key = sport.get("key")
-            odds_url = f"https://api.the-odds-api.com/v4/sports/{sport_key}/odds/?regions=eu&apiKey={API_KEY}"
-            odds_response = requests.get(odds_url)
-
-            if odds_response.status_code == 200:
-                all_odds[sport_key] = odds_response.json()
-            else:
-                all_odds[sport_key] = {"error": f"Failed to fetch odds for {sport_key}"}
-
-        cache.set("all_odds", all_odds, timeout=3600)
-
-        return Response(all_odds)
+        
     
 # 🔹 2️⃣ API για δημιουργία νέων χρηστών
 class CreateUserView(generics.CreateAPIView):
@@ -339,10 +308,6 @@ class CashierUserListView(generics.ListCreateAPIView):
     def get_queryset(self):
         return User.objects.filter(role='user')    
 
-class PlaceBetView(generics.CreateAPIView):
-    serializer_class = BetSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
     def perform_create(self, serializer):
         user = get_object_or_404(CustomUser, id=self.request.user.id)  # Χρήση CustomUser
         balance = get_object_or_404(UserBalance, user=user)  # Σωστή αντιστοίχιση χρήστη στο υπόλοιπο
@@ -353,11 +318,8 @@ class PlaceBetView(generics.CreateAPIView):
         else:
             raise ValidationError({"error": "Insufficient balance to place this bet."})
 
-class SettleBetsView(APIView):
-    """
-    View για την αυτόματη εκκαθάριση των στοιχημάτων.
-    Μόνο οι Admin μπορούν να εκκαθαρίζουν στοιχήματα.
-    """
+         
+    
     permission_classes = [IsAdminUser]  # Επιτρέπεται μόνο σε Admin χρήστες
 
     def get(self, request):
@@ -431,8 +393,6 @@ class UserBetHistoryView(generics.ListAPIView):
 
         return queryset
     
-class CashoutBetView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, bet_id):
         print(f"🔍 Cashout request received - Bet ID: {bet_id}, User: {request.user}")
@@ -939,8 +899,6 @@ class FinancialReportsView(APIView):
        
         return Response(reports)
     
-class GetSportsView(APIView):
-    def get(self, request):
         API_KEY = os.getenv("ODDS_API_KEY")
         if not API_KEY:
             return Response({"error": "API Key not found"}, status=500)
@@ -953,8 +911,6 @@ class GetSportsView(APIView):
 
         return Response(response.json())
 
-class GetAllSportsView(APIView):
-    def get(self, request):
         API_KEY = os.getenv("ODDS_API_KEY")  # ✅ Παίρνει το API Key από το .env
         if not API_KEY:
             return Response({"error": "API Key not found"}, status=500)
@@ -986,6 +942,22 @@ class GetBetSlipView(APIView):
         serializer = BetSerializer(bets, many=True)
         return Response(serializer.data)
 
+    def perform_create(self, serializer):
+        user = self.request.user
+        balance = get_object_or_404(UserBalance, user=user)
+        stake = serializer.validated_data['stake']
+
+        # Έλεγχος αν υπάρχει επαρκές υπόλοιπο
+        if balance.balance < stake:
+            raise ValidationError({"error": "Ανεπαρκές υπόλοιπο"})
+
+        # Αφαίρεση υπολοίπου
+        balance.balance -= stake
+        balance.save()
+
+        # Αποθήκευση στοιχήματος
+        serializer.save(user=user)
+
 class PlaceBetView(generics.CreateAPIView):
     """ Υποβολή στοιχήματος από τον χρήστη. """
     serializer_class = BetSerializer
@@ -1007,3 +979,115 @@ class PlaceBetView(generics.CreateAPIView):
         # Αποθήκευση στοιχήματος
         serializer.save(user=user)
 
+class SettleBetsView(APIView):
+    """
+    Εκκαθαρίζει όλα τα ανοιχτά στοιχήματα βασισμένα σε αποτελέσματα από BetsAPI.
+    Διαθέσιμο μόνο για Admin χρήστες.
+    """
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        token = os.getenv("BETS_API_KEY")
+        if not token:
+            return Response({"error": "Missing BetsAPI token."}, status=500)
+
+        open_bets = Bet.objects.filter(status="open")
+        if not open_bets.exists():
+            return Response({"message": "No open bets to settle."})
+
+        settled_count = 0
+
+        for bet in open_bets:
+            match_id = bet.match_id
+            url = f"https://api.b365api.com/v1/bet365/result?event_id={match_id}&token={token}"
+
+            try:
+                response = requests.get(url)
+                if response.status_code != 200:
+                    continue
+
+                results = response.json().get("results", [])
+                if not results:
+                    continue
+
+                result = results[0]
+                winner = result.get("winner", "").lower()
+
+                if winner == bet.choice.lower():
+                    bet.status = "won"
+                    bet.user.userbalance.add_balance(bet.potential_payout)
+                else:
+                    bet.status = "lost"
+
+                bet.settled_at = now()
+                bet.save()
+                settled_count += 1
+
+            except Exception as e:
+                continue  # Ignore error and move to next bet
+
+        return Response({
+            "message": f"{settled_count} bets have been settled."
+        })
+
+class CashoutBetView(APIView):
+    """
+    Επιτρέπει στους χρήστες να κάνουν cashout ενός ανοικτού στοιχήματος.
+    Υπολογίζει νέα απόδοση από BetsAPI και επιστρέφει αναλογικό ποσό.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, bet_id):
+        user = request.user
+        token = os.getenv("BETS_API_KEY")
+        if not token:
+            return Response({"error": "Missing BetsAPI token."}, status=500)
+
+        try:
+            bet = Bet.objects.get(id=bet_id, user=user, status="open")
+        except Bet.DoesNotExist:
+            return Response({"error": "Bet not found or already settled."}, status=404)
+
+        match_id = bet.match_id
+        url = f"https://api.b365api.com/v1/bet365/prematch?FI={match_id}&token={token}"
+
+        try:
+            response = requests.get(url)
+            data = response.json()
+            results = data.get("results", [])
+            if not results:
+                return Response({"error": "No odds data available."}, status=400)
+
+            odds_data = results[0].get("odds", {}).get("1x2", {})
+            new_odds = None
+
+            if bet.choice == "1":
+                new_odds = float(odds_data.get("home", 0))
+            elif bet.choice == "2":
+                new_odds = float(odds_data.get("away", 0))
+            elif bet.choice.upper() == "X":
+                new_odds = float(odds_data.get("draw", 0))
+
+            if not new_odds or new_odds == 0:
+                return Response({"error": "No valid odds found."}, status=400)
+
+            # Υπολογισμός ποσού cashout
+            cashout_value = round(bet.stake * (new_odds / bet.odds), 2)
+
+            # Ενημέρωση στοιχήματος
+            bet.status = "cashed_out"
+            bet.cashed_out_amount = cashout_value
+            bet.settled_at = now()
+            bet.save()
+
+            # Πίστωση στον χρήστη
+            user_balance = get_object_or_404(UserBalance, user=user)
+            user_balance.add_balance(cashout_value)
+
+            return Response({
+                "message": "Cashout successful.",
+                "cashed_out_amount": cashout_value
+            })
+
+        except Exception as e:
+            return Response({"error": f"Cashout failed: {str(e)}"}, status=500)

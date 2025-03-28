@@ -6,21 +6,25 @@ from django.utils.timezone import now
 
 # Οι διαθέσιμοι ρόλοι χρηστών
 class CustomUser(AbstractUser):
-    USER_ROLES = [
-        ('user', 'Χρήστης'),
-        ('cashier', 'Ταμίας'),
-        ('manager', 'Μάνατζερ'),
-        ('boss', 'Αφεντικό'),
+    email = models.EmailField(unique=True)
+    role = models.CharField(max_length=20, choices=[
+        ('user', 'User'),
+        ('cashier', 'Cashier'),
+        ('manager', 'Manager'),
+        ('boss', 'Boss'),
         ('admin', 'Admin'),
-    ]
+    ])
+    boss = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='boss_users')
+    manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='manager_users')
+    cashier = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='cashier_users')
 
-    role = models.CharField(max_length=10, choices=USER_ROLES, default='user')
-    boss = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name="boss_managers")
-    manager = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name="manager_cashiers")
-    cashier = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name="cashier_users")
+    # 🔹 Προστέθηκαν νέα πεδία:
+    country = models.CharField(max_length=100, blank=True, null=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    birth_date = models.DateField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.username} ({self.get_role_display()})"
+        return self.username
 
 class Bet(models.Model):
     STATUS_CHOICES = [
