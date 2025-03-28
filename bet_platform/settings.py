@@ -11,11 +11,14 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-import os
-from dotenv import load_dotenv
 from datetime import timedelta
+from dotenv import load_dotenv
+import os
 
-load_dotenv()  # 🔹 Φορτώνει τις μεταβλητές περιβάλλοντος από το .env
+# load_dotenv()  # 🔹 Φορτώνει τις μεταβλητές περιβάλλοντος από το .env
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(os.path.join(BASE_DIR, '.dev.env'))
 
 API_KEY = os.getenv("ODDS_API_KEY")  # 🔹 Τώρα θα φορτώνεται σωστά!
 
@@ -90,12 +93,12 @@ WSGI_APPLICATION = 'bet_platform.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'bet_platform',
-        'USER': 'postgres',
-        'PASSWORD': 'denacos',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': os.getenv("DB_ENGINE"),
+        'NAME': os.getenv("DB_NAME"),
+        'USER': os.getenv("DB_USER"),
+        'PASSWORD': os.getenv("DB_PASSWORD"),
+        'HOST': os.getenv("DB_HOST"),
+        'PORT': os.getenv("DB_PORT")
     }    
 }
 

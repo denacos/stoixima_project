@@ -6,19 +6,23 @@ from django.utils.timezone import now
 
 # Οι διαθέσιμοι ρόλοι χρηστών
 class CustomUser(AbstractUser):
-    email = models.EmailField(unique=True)
-    role = models.CharField(max_length=20, choices=[
-        ('user', 'User'),
-        ('cashier', 'Cashier'),
-        ('manager', 'Manager'),
-        ('boss', 'Boss'),
-        ('admin', 'Admin'),
-    ])
+    # Χρήση της κλάσης TextChoices για τους ρόλους χρηστών
+    class UserRoles(models.TextChoices):
+        USER = 'user', 'User'
+        CASHIER = 'cashier', 'Cashier'
+        MANAGER = 'manager', 'Manager'
+        BOSS = 'boss', 'Boss'
+        ADMIN = 'admin', 'Admin'
+
+    email = models.EmailField(max_length=100, blank=True, unique=True)
+    role = models.CharField(max_length=20, choices=UserRoles.choices)
+    
+    # Ιεραρχία χρηστών
     boss = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='boss_users')
     manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='manager_users')
     cashier = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='cashier_users')
 
-    # 🔹 Προστέθηκαν νέα πεδία:
+    # Πρόσθετα πεδία
     country = models.CharField(max_length=100, blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     birth_date = models.DateField(blank=True, null=True)
