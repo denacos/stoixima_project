@@ -43,7 +43,7 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(userObject));
   
       login(userObject, data.access, data.refresh);
-      navigate("/bets");
+      navigate("/");
     } catch (error) {
       setError(error.message || "❌ Σφάλμα σύνδεσης.");
     }

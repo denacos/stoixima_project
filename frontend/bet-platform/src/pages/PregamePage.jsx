@@ -1,76 +1,62 @@
+// PregamePage.jsx
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import axiosInstance from "../api/axiosInstance";
 
 const PregamePage = () => {
-  const { sport_id } = useParams();
-  const [matches, setMatches] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [competitions, setCompetitions] = useState([]);
+  const sportId = 1; // Προεπιλογή το ποδόσφαιρο
 
   useEffect(() => {
-    axiosInstance
-      .get(`/pregame-matches/?sport_id=${sport_id}`)
-      .then((res) => setMatches(res.data))
-      .catch((err) => console.error("⚠️ Σφάλμα φόρτωσης αγώνων:", err))
-      .finally(() => setLoading(false));
-  }, [sport_id]);
+    const fetchCompetitions = async () => {
+      try {
+        const token = localStorage.getItem("access");
+        const response = await fetch(`http://127.0.0.1:8000/api/pregame-matches/${sportId}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setCompetitions(data);
+        } else {
+          console.error("Η απόκριση δεν είναι πίνακας:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching competitions:", error);
+      }
+    };
 
-  const goToOdds = (matchId) => {
-    navigate(`/pregame-odds/${matchId}`);
-  };
+    fetchCompetitions();
+  }, [sportId]);
 
   return (
-    <div style={{ padding: "20px", backgroundColor: "#111", color: "#fff", minHeight: "100vh" }}>
-      <h2 style={{ color: "#9de167", marginBottom: "20px" }}>📅 ΠΡΟΣΕΧΕΙΣ ΑΓΩΝΕΣ</h2>
+    <div className="flex justify-center py-10 px-4 bg-gray-900 min-h-screen">
+      <div className="flex gap-10">
+        {/* Κεντρική περιοχή αποτελεσμάτων */}
+        <div className="w-2/3 bg-gray-800 text-white p-5 rounded-lg shadow-lg">
+          <h2 className="text-2xl mb-4">Διοργανώσεις για το Σπορ: Ποδόσφαιρο</h2>
+          <div className="space-y-3">
+            {competitions.length === 0 ? (
+              <p>⏳ Φόρτωση διοργανώσεων...</p>
+            ) : (
+              <ul>
+                {competitions.map((competition) => (
+                  <li key={competition.id}>
+                    <a href={`/pregame/${competition.id}`} className="text-green-400 hover:text-white">
+                      {competition.league.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
 
-      {loading ? (
-        <p>⏳ Φόρτωση αγώνων...</p>
-      ) : matches.length === 0 ? (
-        <p>🚫 Δεν βρέθηκαν αγώνες για το επιλεγμένο άθλημα.</p>
-      ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ backgroundColor: "#222" }}>
-              <th style={{ padding: "12px", borderBottom: "1px solid #333" }}>Ώρα</th>
-              <th style={{ padding: "12px", borderBottom: "1px solid #333" }}>Ομάδες</th>
-              <th style={{ padding: "12px", borderBottom: "1px solid #333" }}>Διοργάνωση</th>
-              <th style={{ padding: "12px", borderBottom: "1px solid #333" }}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {matches.map((match) => (
-              <tr key={match.id} style={{ borderBottom: "1px solid #333" }}>
-                <td style={{ padding: "10px" }}>
-                  {new Date(match.time * 1000).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </td>
-                <td style={{ padding: "10px" }}>
-                  {match.home.name} vs {match.away.name}
-                </td>
-                <td style={{ padding: "10px" }}>{match.league.name}</td>
-                <td style={{ padding: "10px" }}>
-                  <button
-                    onClick={() => goToOdds(match.id)}
-                    style={{
-                      padding: "8px 14px",
-                      backgroundColor: "#28a745",
-                      border: "none",
-                      color: "#fff",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Αποδόσεις
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+        {/* Στήλη για μελλοντικές πληροφορίες */}
+        <div className="w-1/3 bg-gray-800 text-white p-5 rounded-lg shadow-lg">
+          <h3 className="text-xl font-semibold">Περισσότερες Πληροφορίες</h3>
+          <p className="mt-2">Εδώ θα μπουν περισσότερες πληροφορίες αργότερα.</p>
+        </div>
+      </div>
     </div>
   );
 };

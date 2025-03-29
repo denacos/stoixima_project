@@ -285,16 +285,20 @@ def get_structured_live_matches(request):
 class PregameMatchesView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        sport_id = request.GET.get("sport_id", "1")
+    def get(self, request, sport_id):
         token = os.getenv("BETS_API_KEY")
         url = f"https://api.b365api.com/v1/bet365/upcoming?sport_id={sport_id}&token={token}"
         try:
             response = requests.get(url)
             data = response.json()
-            return Response(data.get("results", []))
-        except Exception as e:
-            return Response({"error": str(e)}, status=500)
+
+            if data["success"] == 1:
+                # Επιστρέφουμε τις διοργανώσεις στην ίδια μορφή
+                return Response(data["results"], status=200)
+            else:
+                return Response({"detail": "No data found"}, status=404)
+        except requests.exceptions.RequestException as e:
+            return Response({"detail": str(e)}, status=500)
 
 class PregameOddsView(APIView):
     permission_classes = [IsAuthenticated]

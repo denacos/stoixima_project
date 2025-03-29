@@ -1,18 +1,25 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
+import PregamePage from '../pages/PregamePage'; // PregamePage component
 import SportsMenu from "./SportsMenu";
 
 const Layout = ({ children, onSelectSport }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isLoginPage = location.pathname === "/login";
+  const isPregamePage = location.pathname.startsWith("/pregame"); // Έλεγχος για PregamePage
 
-  const [activeCategory, setActiveCategory] = useState("sports");
+  const [activeCategory, setActiveCategory] = useState("live");
 
   const handleSelectCategory = (category) => {
     setActiveCategory(category);
-    // Αν θέλεις redirect ή άλλο action, μπορείς να το προσθέσεις εδώ
+    if (category === "sports") {
+      // Ανακατεύθυνση στη σελίδα Pregame με sportId=1 (Ποδόσφαιρο)
+      navigate("/pregame/1"); 
+    }
+    // Αν θέλεις να προσθέσεις άλλες κατηγορίες, μπορείς να το κάνεις εδώ
   };
 
   return (
@@ -21,24 +28,21 @@ const Layout = ({ children, onSelectSport }) => {
 
       {!isLoginPage && (
         <div className="flex flex-col min-h-screen relative">
-          
-
-          {/* ✅ SportsMenu με state και handler */}
+          {/* SportsMenu με το state και handler */}
           <SportsMenu
             onSelectCategory={handleSelectCategory}
             activeCategory={activeCategory}
           />
 
-          <div className="flex flex-row flex-1">
-            <Sidebar onSelectSport={onSelectSport} />
-            <div className="flex-1 p-4">{children}</div>
-          </div>
-        </div>
-      )}
+          <div className="flex flex-1">
+            {/* Sidebar - Θα εμφανίζεται μόνο στην PregamePage */}
+            {isPregamePage && <Sidebar selectedSport={1} />}
 
-      {isLoginPage && (
-        <div className="flex justify-center items-center min-h-screen">
-          {children}
+            {/* Κεντρικό περιεχόμενο */}
+            <div className="flex-1 p-5 bg-gray-900 text-white">
+              <PregamePage /> {/* Εδώ καλείται το PregamePage */}
+            </div>
+          </div>
         </div>
       )}
     </>

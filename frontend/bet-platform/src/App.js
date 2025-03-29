@@ -16,6 +16,7 @@ import MatchDetails from "./pages/MatchDetails";
 import BetSlip from "./components/BetSlip";
 import HomePage from "./pages/HomePage"; // ✅ Προσθήκη HomePage
 import AllMatchesPage from "./pages/AllMatchesPage"; // ✅ Προσθήκη AllMatchesPage
+import PregamePage from "./pages/PregamePage";
 import PregameOddsPage from "./pages/PregameOddsPage"; // ✅ Νέα σελίδα για αποδόσεις
 import WalletPage from "./pages/WalletPage";
 import PreferencesPage from "./pages/PreferencesPage";
@@ -67,9 +68,10 @@ const AuthenticatedRoutes = ({ addBet }) => {
     <Layout>
       <Routes>
         <Route path="/" element={<HomePage />} /> {/* ✅ Κάνει το "/" να οδηγεί στο HomePage */}
-        <Route path="/all-matches" element={<AllMatchesPage />} /> {/* ✅ Σελίδα για όλους τους pregame αγώνες */}
+        {/* <Route path="/all-matches" element={<AllMatchesPage />} /> ✅ Σελίδα για όλους τους pregame αγώνες */}
         <Route path="/matches/:leagueKey" element={<MatchesPage addBet={addBet} />} />
-        <Route path="/match/:matchId" element={<MatchDetails />} />
+        <Route path="/pregame/:sportId" element={<PregamePage />} /> {/* Ενημέρωση για το PregamePage */}
+        {/* <Route path="/match/:matchId" element={<MatchDetails />} /> */}
         <Route path="/pregame-odds/:matchId" element={<PregameOddsPage />} /> {/* ✅ Νέα δυναμική διαδρομή */}
 
         {user?.role === "user" && (

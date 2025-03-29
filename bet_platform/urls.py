@@ -13,7 +13,7 @@ urlpatterns = [
     path("api/financial-reports/", lambda request: redirect("/api/users/financial-reports/", permanent=True)),
     path('api/betsapi/sports/', fetch_betsapi_sports),
     path("api/live-matches/", get_live_matches, name="live-matches"),
-    path("api/pregame-matches/", PregameMatchesView.as_view(), name="pregame-matches"),  # ✅ αυτό εδώ
+    path("api/pregame-matches/<int:sport_id>/", PregameMatchesView.as_view(), name="pregame-matches"),  # ✅ αυτό εδώ
     path("api/pregame-odds/<int:match_id>/", PregameOddsView.as_view(), name="pregame-odds"),
     path('api/pregame-structured/', PregameStructuredView.as_view(), name='pregame-structured'),
     path('api/pregame-leagues/', PregameLeaguesView.as_view(), name='pregame-leagues'),
