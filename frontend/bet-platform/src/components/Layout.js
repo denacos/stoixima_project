@@ -1,50 +1,71 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
-import Sidebar from "./Sidebar";
-import PregamePage from '../pages/PregamePage'; // PregamePage component
 import SportsMenu from "./SportsMenu";
+import BetSlip from "./BetSlip";
 
 const Layout = ({ children, onSelectSport }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const isLoginPage = location.pathname === "/login";
-  const isPregamePage = location.pathname.startsWith("/pregame"); // Έλεγχος για PregamePage
+  const isLoginPage = location.pathname.startsWith("/login");
+  const [selectedBets, setSelectedBets] = useState([
+    {
+      id: 1,
+      team: 'Πανσερραϊκός',
+      market: 'Τελικό Αποτέλεσμα',
+      odds: 1.72,
+      stake: '',
+    },
+    {
+      id: 2,
+      team: 'Φιορεντίνα',
+      market: 'Τελικό Αποτέλεσμα',
+      odds: 1.80,
+      stake: '',
+    },
+  ]);
+  
 
-  const [activeCategory, setActiveCategory] = useState("live");
+  const [activeCategory, setActiveCategory] = useState(() => {
+    if (location.pathname.startsWith("/pregame")) return "sports";
+    if (location.pathname === "/casino") return "casino";
+    return "live";
+  });
 
   const handleSelectCategory = (category) => {
     setActiveCategory(category);
-    if (category === "sports") {
-      // Ανακατεύθυνση στη σελίδα Pregame με sportId=1 (Ποδόσφαιρο)
-      navigate("/pregame/1"); 
-    }
-    // Αν θέλεις να προσθέσεις άλλες κατηγορίες, μπορείς να το κάνεις εδώ
+
+    if (category === "sports") navigate("/pregame/1");
+    else if (category === "live") navigate("/");
+    else if (category === "casino") navigate("/casino");
   };
+
+  if (isLoginPage) {
+    return <Outlet />;
+  }
 
   return (
     <>
-      {!isLoginPage && <Navbar />}
+      <Navbar />
 
-      {!isLoginPage && (
-        <div className="flex flex-col min-h-screen relative">
-          {/* SportsMenu με το state και handler */}
-          <SportsMenu
-            onSelectCategory={handleSelectCategory}
-            activeCategory={activeCategory}
-          />
+      <div className="flex flex-col min-h-screen relative">
+        <SportsMenu
+          onSelectCategory={handleSelectCategory}
+          activeCategory={activeCategory}
+        />
 
-          <div className="flex flex-1">
-            {/* Sidebar - Θα εμφανίζεται μόνο στην PregamePage */}
-            {isPregamePage && <Sidebar selectedSport={1} />}
-
-            {/* Κεντρικό περιεχόμενο */}
-            <div className="flex-1 p-5 bg-gray-900 text-white">
-              <PregamePage /> {/* Εδώ καλείται το PregamePage */}
-            </div>
-          </div>
+        <div className="flex flex-1">
+          <Outlet />
         </div>
-      )}
+
+        {/* {user && selectedBets.length > 0 && !shouldHideBetslip && (
+          <BetSlip selectedBets={selectedBets} setSelectedBets={setSelectedBets} />
+        )} */}
+
+        <div className="flex justify-center mt-4">
+          <BetSlip selectedBets={selectedBets} setSelectedBets={setSelectedBets} />
+        </div>
+      </div>
     </>
   );
 };

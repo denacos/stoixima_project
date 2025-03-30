@@ -38,7 +38,7 @@ const HomePage = () => {
   const filtered = liveData.filter(g => g.sport === selectedSport);
 
   return (
-    <div className="p-4 bg-[#111] text-white min-h-screen">
+    <div className="flex justify-center w-full px-4 py-6">
       {/* Sport selector */}
       <div className="flex gap-2 mb-6 overflow-x-auto">
         {sports.map((sport) => (

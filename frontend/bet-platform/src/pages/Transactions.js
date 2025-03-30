@@ -59,8 +59,8 @@ const TransactionHistory = () => {
   const totalAmount = transactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen font-sans">
-      <div className="bg-white rounded-lg shadow p-4 max-w-4xl mx-auto">
+    <div className="flex justify-center w-full px-4 py-6">
+      <div className="w-full max-w-5xl bg-white rounded-lg shadow p-6 text-black">
         <h2 className="text-xl font-semibold mb-4">Ιστορικό Συναλλαγών</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">

@@ -6,6 +6,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
+from ..models import UserBalance 
 
 User = get_user_model()
 
@@ -27,10 +28,15 @@ class CustomLoginView(ObtainAuthToken):
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
+        try:
+            balance = self.user.userbalance.balance
+        except UserBalance.DoesNotExist:
+            balance = 0.0
         user = self.user
         data["user"] = {
             "username": user.username,
-            "role": user.role
+            "role": user.role,
+            "balance": balance,
         }
         return data
 

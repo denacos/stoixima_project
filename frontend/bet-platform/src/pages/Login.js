@@ -1,54 +1,52 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthProvider";
+import { useAuth } from "../context/AuthProvider"; // ✅ useAuth
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { login, user } = useContext(AuthContext);
+  const { login, authTokens } = useAuth(); // ✅ useAuth hook
 
   useEffect(() => {
-    if (user) {
-      console.log("✅ Ο χρήστης είναι ήδη συνδεδεμένος:", user);
-      navigate("/"); // μπορείς να βάλεις π.χ. "/bets" αν θέλεις
+    if (authTokens) {
+      console.log("✅ Ο χρήστης είναι ήδη συνδεδεμένος");
     }
-  }, [user, navigate]);
+  }, [authTokens, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(null);
-  
+
     try {
       const response = await fetch("http://127.0.0.1:8000/api/token/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
-  
+
       if (!response.ok) {
         throw new Error("❌ Λάθος στοιχεία! Δοκιμάστε ξανά.");
       }
-  
+
       const data = await response.json();
-  
+
       const userObject = {
         username,
-        role: "user", // ✨ κρίσιμο
+        role: "user",
       };
-  
+
       localStorage.setItem("access", data.access);
       localStorage.setItem("refreshToken", data.refresh);
-      localStorage.setItem("user", JSON.stringify(userObject));
-  
-      login(userObject, data.access, data.refresh);
+      localStorage.setItem("user", JSON.stringify(data.user)); // ✅ corrected
+
+      login(data.access, data.refresh);
       navigate("/");
     } catch (error) {
       setError(error.message || "❌ Σφάλμα σύνδεσης.");
     }
   };
-  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

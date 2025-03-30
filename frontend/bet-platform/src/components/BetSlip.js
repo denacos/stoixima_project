@@ -1,179 +1,117 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useAuth } from "../context/AuthProvider";
-import BetButton from './ui/BetButton';
+import React, { useState, useEffect } from 'react';
+import { FaTimes, FaChevronUp, FaChevronDown } from 'react-icons/fa';
 
+const BetSlip = ({ selectedBets = [], setSelectedBets }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [amounts, setAmounts] = useState({});
+  const [comboAmount, setComboAmount] = useState('');
 
-const BetSlip = ({ isOpen, onClose, betSlip, removeBet }) => {
-  const { token } = useAuth();
-  const [bets, setBets] = useState(betSlip);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [betType, setBetType] = useState("single");
-  const [systemBets, setSystemBets] = useState([]);
+  const toggleExpand = () => setExpanded((prev) => !prev);
 
-  useEffect(() => {
-    setBets(betSlip);
-    if (token) {
-      console.log("Token ενεργό:", token);
-    }
-  }, [betSlip, token]);
-
-  const hasSameMatchMultipleBets = useMemo(() => {
-    const ids = bets.map((bet) => bet?.match?.id).filter(Boolean);
-    const count = {};
-    for (const id of ids) {
-      count[id] = (count[id] || 0) + 1;
-      if (count[id] > 1) return true;
-    }
-    return false;
-  }, [bets]);
-
-  useEffect(() => {
-    if (betType === "parlay" && hasSameMatchMultipleBets) {
-      setBetType("single");
-    }
-  }, [betType, hasSameMatchMultipleBets]);
-
-  const calculateSystemPayout = useCallback(
-    (numSelections) => {
-      const subsetOdds = bets
-        .slice(0, numSelections)
-        .reduce((acc, bet) => acc * bet.odds, 1);
-      return (subsetOdds * 10).toFixed(2);
-    },
-    [bets]
-  );
-
-  useEffect(() => {
-    if (betType === "system") {
-      const newSystems = [];
-      for (let i = 2; i <= bets.length; i++) {
-        newSystems.push({
-          name: `${i} Επιλογές`,
-          odds: calculateSystemPayout(i),
-          stake: "",
-        });
-      }
-      setSystemBets(newSystems);
-    }
-  }, [bets, betType, calculateSystemPayout]);
-
-  const calculateParlayPayout = () => {
-    const totalOdds = bets.reduce((acc, bet) => acc * bet.odds, 1);
-    return (totalOdds * (bets[0]?.stake || 1)).toFixed(2);
+  const handleAmountChange = (id, value) => {
+    setAmounts((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleStakeChange = (index, newStake) => {
-    const updated = [...bets];
-    updated[index].stake = newStake;
-    setBets(updated);
+  const handleRemove = (id) => {
+    setSelectedBets((prev) => prev.filter((bet) => bet.id !== id));
+    setAmounts((prev) => {
+      const updated = { ...prev };
+      delete updated[id];
+      return updated;
+    });
   };
 
-  const handlePlaceBet = () => {
-    if (betType === "parlay" && hasSameMatchMultipleBets) {
-      alert("❌ Δεν μπορείτε να τοποθετήσετε παρολί με πολλαπλά σημεία από τον ίδιο αγώνα.");
-      return;
-    }
-
-    console.log("📤 Τοποθέτηση στοιχήματος:", bets, "Τύπος:", betType);
-    // TODO: σύνδεση με API
+  const clearAll = () => {
+    setSelectedBets([]);
+    setAmounts({});
+    setComboAmount('');
   };
+
+  const totalOdds = selectedBets.reduce((acc, bet) => acc * bet.odds, 1);
+  const comboReturn = (parseFloat(comboAmount || 0) * totalOdds).toFixed(2);
+
+  const comboLabel = ["Μονά", "Διπλά", "Τριπλά", "Τετραπλά", "Πενταπλά"][selectedBets.length - 1] || `${selectedBets.length}πλά`;
+
+  if (selectedBets.length === 0) return null;
 
   return (
-    <div className={`betslip-container ${isMinimized ? "minimized" : "open"}`}>
-      <div className="betslip-header" onClick={() => setIsMinimized(!isMinimized)}>
-        <h2>Επιλογές</h2>
-        <span className="toggle-btn">{isMinimized ? "⬆" : "⬇"}</span>
+    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md bg-neutral-900 rounded-t-xl shadow-2xl">
+      <div
+        className="flex justify-between items-center px-4 py-2 border-b border-neutral-700 cursor-pointer"
+        onClick={toggleExpand}
+      >
+        <h3 className="text-white font-bold text-lg">
+          {selectedBets.length} {selectedBets.length === 1 ? 'Επιλογή' : 'Επιλογές'}
+        </h3>
+        <button className="text-white">
+          {expanded ? <FaChevronDown /> : <FaChevronUp />}
+        </button>
       </div>
 
-      {!isMinimized && (
-        <div className="betslip-body">
-          {/* ✅ Επιλογή τύπου στοιχήματος */}
-          <div className="bet-type-selection">
-            <button
-              onClick={() => setBetType("single")}
-              className={betType === "single" ? "active" : ""}
-            >
-              Μονά
-            </button>
-            <button
-              onClick={() => setBetType("parlay")}
-              className={betType === "parlay" ? "active" : ""}
-              disabled={hasSameMatchMultipleBets}
-            >
-              Παρολί
-            </button>
-            <button
-              onClick={() => setBetType("system")}
-              className={betType === "system" ? "active" : ""}
-            >
-              Σύστημα
-            </button>
-          </div>
+      {expanded && (
+        <div className="p-4 space-y-3 relative">
+          <button
+            onClick={clearAll}
+            className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
+          >
+            <FaTimes />
+          </button>
 
-          {/* ✅ Λίστα στοιχημάτων */}
-          <div className="bet-list">
-            {bets.length === 0 ? (
-              <p className="empty-message">Δεν έχετε επιλέξει στοιχήματα.</p>
-            ) : (
-              bets.map((bet, index) => (
-                <div key={index} className="bet-item">
-                  <div className="bet-info">
-                    <span className="bet-team">{bet.choice}</span>
-                    <span className="bet-odds">@ {bet.odds}</span>
-                  </div>
-                  <div className="stake-input-container">
-                    <input
-                      type="number"
-                      min="1"
-                      step="0.01"
-                      placeholder="Ποσό"
-                      value={bet.stake || ""}
-                      onChange={(e) =>
-                        handleStakeChange(index, parseFloat(e.target.value) || "")
-                      }
-                    />
-                  </div>
-                  <button className="remove-bet" onClick={() => removeBet(index)}>
-                    ✖
-                  </button>
+          {selectedBets.map((bet) => (
+            <div key={bet.id} className="bg-neutral-800 p-3 rounded relative">
+              <button
+                onClick={() => handleRemove(bet.id)}
+                className="absolute right-2 top-2 text-gray-400 hover:text-red-500"
+              >
+                <FaTimes size={12} />
+              </button>
+              <div className="text-green-400 font-bold">{bet.team}</div>
+              <div className="text-sm text-gray-300">{bet.market}</div>
+              <div className="flex items-center mt-2 gap-2">
+                <span className="font-semibold text-white">{bet.odds}</span>
+                <input
+                  type="number"
+                  placeholder="Ποσό"
+                  value={amounts[bet.id] || ''}
+                  onChange={(e) => handleAmountChange(bet.id, e.target.value)}
+                  className="w-24 p-1 bg-neutral-900 text-white border border-gray-600 rounded-md text-right"
+                />
+              </div>
+            </div>
+          ))}
+
+          {selectedBets.length >= 2 && (
+            <div className="bg-neutral-800 p-3 rounded">
+              <div className="flex justify-between items-center mb-1 text-green-300 font-semibold">
+                <span>{comboLabel}</span>
+                <span>{totalOdds.toFixed(2)}</span>
+              </div>
+              <input
+                type="number"
+                placeholder="Ποσό"
+                value={comboAmount}
+                onChange={(e) => setComboAmount(e.target.value)}
+                className="w-full p-1 bg-neutral-900 text-white border border-gray-600 rounded-md text-right"
+              />
+              {comboAmount && (
+                <div className="text-sm text-gray-400 mt-1">
+                  Επιστρέφει €{comboReturn}
                 </div>
-              ))
-            )}
-          </div>
-
-          {/* ✅ Πληροφορίες Παρολί ή Σύστημα */}
-          {bets.length > 0 && (
-            <div className="betslip-footer">
-              {betType === "parlay" && hasSameMatchMultipleBets ? (
-                <p className="warning-text">
-                  ❌ Οι τρέχουσες επιλογές δεν μπορούν να τοποθετηθούν ως παρολί.
-                </p>
-              ) : (
-                <>
-                  {betType === "parlay" && (
-                    <div className="total-payout">
-                      Συνολικό Κέρδος (Παρολί):{" "}
-                      <strong>{calculateParlayPayout()}</strong>
-                    </div>
-                  )}
-
-                  {betType === "system" && systemBets.length > 0 && (
-                    <div className="system-bets">
-                      <h3>Περισσότερα Πολλαπλά Επιλογών</h3>
-                      {systemBets.map((sys, idx) => (
-                        <div key={idx} className="system-option">
-                          <span>{sys.name}</span>
-                          <span>{sys.odds}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <BetButton bets={bets} betType={betType} onClick={handlePlaceBet} />
-                </>
               )}
             </div>
           )}
+
+          <button
+            onClick={() => alert('🟢 Τοποθέτηση στοιχήματος!')}
+            className="w-full mt-2 py-2 bg-green-600 hover:bg-green-700 text-white rounded"
+          >
+            Στοιχημάτισε €{
+              (
+                Object.values(amounts).reduce((a, b) => a + Number(b || 0), 0) +
+                Number(comboAmount || 0)
+              ).toFixed(2)
+            }
+          </button>
         </div>
       )}
     </div>

@@ -34,8 +34,8 @@ const UserSettings = () => {
   }, [token]);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen font-sans">
-      <div className="bg-white shadow-md rounded-lg max-w-2xl mx-auto p-6">
+    <div className="flex justify-center w-full px-4 py-6">
+      <div className="w-full max-w-5xl bg-white rounded-lg shadow p-6 text-black">
         <h2 className="text-xl font-semibold mb-4">👤 Λογαριασμός Χρήστη</h2>
 
         {loading ? (

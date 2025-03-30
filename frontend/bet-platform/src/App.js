@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "./context/AuthProvider";
 import { AuthProvider } from "./context/AuthProvider";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Unauthorized from "./pages/Unauthorized";
@@ -12,10 +12,7 @@ import UserSettings from "./pages/UserSettings";
 import LiveGames from "./pages/LiveGames";
 import Casino from "./pages/Casino";
 import MatchesPage from "./pages/MatchesPage";
-import MatchDetails from "./pages/MatchDetails";
-import BetSlip from "./components/BetSlip";
 import HomePage from "./pages/HomePage"; // ✅ Προσθήκη HomePage
-import AllMatchesPage from "./pages/AllMatchesPage"; // ✅ Προσθήκη AllMatchesPage
 import PregamePage from "./pages/PregamePage";
 import PregameOddsPage from "./pages/PregameOddsPage"; // ✅ Νέα σελίδα για αποδόσεις
 import WalletPage from "./pages/WalletPage";
@@ -26,11 +23,9 @@ import "./styles/GlobalStyles.css";
 
 const App = () => {
   const [bets, setBets] = useState([]);
-  const [isBetSlipOpen, setBetSlipOpen] = useState(false);
 
   const addBet = (bet) => {
     setBets([...bets, bet]);
-    setBetSlipOpen(true);
   };
 
   const removeBet = (index) => {
@@ -43,36 +38,28 @@ const App = () => {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
-          <Route path="/*" element={<AuthenticatedRoutes addBet={addBet} />} />
-        </Routes>
 
-        <BetSlip
-          isOpen={isBetSlipOpen}
-          onClose={() => setBetSlipOpen(false)}
-          betSlip={bets}
-          removeBet={removeBet}
-        />
+          {/* 🛡️ Protected Routes */}
+          <Route path="/*" element={<PrivateRoutes addBet={addBet} />} />
+        </Routes>
       </Router>
     </AuthProvider>
   );
 };
 
-const AuthenticatedRoutes = ({ addBet }) => {
+const PrivateRoutes = ({ addBet }) => {
   const { user } = useAuth();
 
-  if (!user) {
-    return <Login />;
-  }
+  if (!user) return <Navigate to="/login" replace />;
 
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<HomePage />} /> {/* ✅ Κάνει το "/" να οδηγεί στο HomePage */}
-        {/* <Route path="/all-matches" element={<AllMatchesPage />} /> ✅ Σελίδα για όλους τους pregame αγώνες */}
+    <Routes>
+      {/* Layout που τυλίγει τις εσωτερικές σελίδες */}
+      <Route element={<Layout />}>
+        <Route index element={<HomePage />} />
+        <Route path="/pregame/:sportId" element={<PregamePage />} />
         <Route path="/matches/:leagueKey" element={<MatchesPage addBet={addBet} />} />
-        <Route path="/pregame/:sportId" element={<PregamePage />} /> {/* Ενημέρωση για το PregamePage */}
-        {/* <Route path="/match/:matchId" element={<MatchDetails />} /> */}
-        <Route path="/pregame-odds/:matchId" element={<PregameOddsPage />} /> {/* ✅ Νέα δυναμική διαδρομή */}
+        <Route path="/pregame-odds/:matchId" element={<PregameOddsPage />} />
 
         {user?.role === "user" && (
           <>
@@ -86,6 +73,7 @@ const AuthenticatedRoutes = ({ addBet }) => {
             <Route path="/chat" element={<ChatPage />} />
           </>
         )}
+
         {user?.role === "cashier" && <Route path="/cashier" element={<Dashboard />} />}
         {user?.role === "admin" && (
           <>
@@ -94,8 +82,8 @@ const AuthenticatedRoutes = ({ addBet }) => {
             <Route path="/financial-reports" element={<Dashboard />} />
           </>
         )}
-      </Routes>
-    </Layout>
+      </Route>
+    </Routes>
   );
 };
 
