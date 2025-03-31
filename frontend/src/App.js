@@ -3,21 +3,21 @@ import { useAuth } from "./context/AuthProvider";
 import { AuthProvider } from "./context/AuthProvider";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
-import Login from "./pages/Login";
-import Unauthorized from "./pages/Unauthorized";
-import Dashboard from "./pages/Dashboard";
-import UserBets from "./pages/UserBets";
-import Transactions from "./pages/Transactions";
-import UserSettings from "./pages/UserSettings";
-import LiveGames from "./pages/LiveGames";
-import Casino from "./pages/Casino";
-import MatchesPage from "./pages/MatchesPage";
-import HomePage from "./pages/HomePage"; // ✅ Προσθήκη HomePage
-import PregamePage from "./pages/PregamePage";
-import PregameOddsPage from "./pages/PregameOddsPage"; // ✅ Νέα σελίδα για αποδόσεις
-import WalletPage from "./pages/WalletPage";
-import PreferencesPage from "./pages/PreferencesPage";
-import ChatPage from "./pages/ChatPage";
+import Login from "./components/Login";
+import Unauthorized from "./components/Unauthorized";
+import UserBets from "./settings/UserBets";
+import Transactions from "./settings/Transactions";
+import UserSettings from "./settings/UserSettings";
+import WalletPage from "./settings/WalletPage";
+import Dashboard from "./settings/Dashboard";
+import ChatPage from "./settings/ChatPage";
+import PreferencesPage from "./settings/PreferencesPage";
+import LiveGames from "./sports/LiveGames";
+import MatchesPage from "./sports/MatchesPage";
+import HomePage from "./sports/HomePage";
+import PregamePage from "./sports/PregamePage";
+import PregameOddsPage from "./sports/PregameOddsPage"; 
+import Casino from "./casino/Casino";
 import "./styles/GlobalStyles.css";
 
 

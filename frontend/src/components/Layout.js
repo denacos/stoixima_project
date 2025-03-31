@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import SportsMenu from "./SportsMenu";
-import BetSlip from "./BetSlip";
+import BetSlip from "../sports/BetSlip";
 
 const Layout = ({ children, onSelectSport }) => {
   const location = useLocation();
