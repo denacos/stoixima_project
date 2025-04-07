@@ -17,7 +17,10 @@ const UserBets = () => {
 
   const [stats, setStats] = useState({ total: 0, in: 0, out: 0 });
 
+  const isBetIdValid = betId === '' || /^\d+$/.test(betId);
+
   const handleSearch = async () => {
+    if (!isBetIdValid) return;
     setLoading(true);
     setError('');
 
@@ -100,10 +103,19 @@ const UserBets = () => {
         </div>
         <div>
           <label>Bet ID:</label>
-          <input type="text" value={betId} onChange={(e) => setBetId(e.target.value)} className="w-full p-2 rounded bg-neutral-800 border border-gray-600" />
+          <input 
+            type="text"
+            value={betId} 
+            onChange={(e) => setBetId(e.target.value)}
+             className={`w-full p-2 rounded border ${isBetIdValid ? 'bg-neutral-800 border-gray-600' : 'bg-neutral-800 border-red-500'}`} />
         </div>
         <div>
-          <button onClick={handleSearch} className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 rounded">Αναζήτηση</button>
+          <button 
+            onClick={handleSearch} 
+            disabled={!isBetIdValid}
+            className={`w-full py-2 px-4 rounded ${!isBetIdValid ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}>
+              Αναζήτηση
+          </button>
         </div>
       </div>
 

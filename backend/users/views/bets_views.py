@@ -127,10 +127,18 @@ class UserBetHistoryView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         queryset = Bet.objects.filter(user=user).order_by('-created_at')
-        status = self.request.query_params.get('status', None)
+        
+        # Φίλτρο κατάστασης
+        status = self.request.query_params.get('status')
         if status:
             queryset = queryset.filter(status=status)
 
+        # Φίλτρο Bet ID
+        bet_id = self.request.query_params.get('bet_id')
+        if bet_id:
+            queryset = queryset.filter(id=bet_id)
+
+        # Φίλτρα ημερομηνιών (UTC)
         from_date = self.request.query_params.get('from_date')
         to_date = self.request.query_params.get('to_date')
 

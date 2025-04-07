@@ -269,16 +269,17 @@ const BetSlip = ({ selectedBets = [], setSelectedBets }) => {
             </div>
           )}
 
-          <div className="sticky bottom-0 bg-neutral-900 pt-2 pb-4 z-10 shadow-inner">
-          <button
-            onClick={handlePlaceBet}
-            className="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded"
-          >
-            Στοιχημάτισε €{totalStake.toFixed(2)}
-          </button>
-        </div>
+          
         </div>
       )}
+      <div className="sticky bottom bg-neutral-900 pt-2 pb-2 z-10 shadow-inner">
+        <button
+          onClick={handlePlaceBet}
+          className="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded"
+        >
+          Στοιχημάτισε €{totalStake.toFixed(2)}
+        </button>
+      </div>
     </div>
   );
 };

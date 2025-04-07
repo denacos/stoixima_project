@@ -60,7 +60,7 @@ const PregamePage = () => {
   return (
     <div className="flex min-h-screen bg-black text-white">
       {/* Sidebar */}
-      <div className="w-64 bg-gray-200 p-4">
+      <div className="w-64 bg-gray-200 p-4 overflow-y-auto max-h-screen">
         <h2 className="text-base font-medium mb-4">Αθλήματα</h2>
         <ul className="space-y-2">
           {Object.entries(sports).map(([id, sport]) => (
@@ -80,7 +80,7 @@ const PregamePage = () => {
       </div>
 
       {/* Κεντρικό περιεχόμενο + δεξιά στήλη */}
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-y-auto">
         {/* Κεντρικό */}
         <div className="flex-grow bg-gray-200 p-6 rounded-lg shadow-md m-4">
           <h2 className="text-xl font-bold mb-4">Διοργανώσεις - {sports[selectedSport].name}</h2>

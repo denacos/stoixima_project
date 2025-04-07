@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthProvider";
 import axios from "../context/axiosInstance"
+import { useNavigate } from "react-router-dom";
 import {
   Wallet,
   User,
@@ -15,6 +16,7 @@ import {
 const Navbar = () => {
   const { authTokens, logout, user, setUser } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const navigate = useNavigate();
 
   const menuRef = useRef(null);
 
@@ -25,6 +27,10 @@ const Navbar = () => {
         setDropdownOpen(false);
       }
     };
+
+    if (!authTokens || !user) {
+      navigate("/login");
+    }
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
