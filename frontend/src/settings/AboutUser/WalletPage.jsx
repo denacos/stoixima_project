@@ -65,8 +65,8 @@ const WalletPage = () => {
               <thead>
                 <tr className="bg-gray-200 text-left">
                   <th className="p-2 border">Προϊόν</th>
-                  <th className="p-2 border">In</th>
-                  <th className="p-2 border">Out</th>
+                  <th className="p-2 border">Πονταρίσματα</th>
+                  <th className="p-2 border">Κέρδη</th>
                   <th className="p-2 border">Μικτό</th>
                 </tr>
               </thead>
@@ -90,7 +90,7 @@ const WalletPage = () => {
               <strong>Εκκρεμή δελτία:</strong> {pendingBets.length}
             </div>
             <div className="text-sm text-gray-800 mb-4">
-              <strong>Σύνολο εκκρεμών In:</strong> {pendingTotal.toFixed(2)}€
+              <strong>Σύνολο εκκρεμών πονταρισμάτων:</strong> {pendingTotal.toFixed(2)}€
             </div>
 
             <div className="text-sm text-gray-600">

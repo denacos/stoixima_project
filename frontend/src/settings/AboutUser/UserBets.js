@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "../context/axiosInstance";
+import axios from "../../context/axiosInstance";
 
 const UserBets = () => {
   const now = new Date();

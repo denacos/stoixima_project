@@ -1,26 +1,25 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthProvider";
-import axios from "../context/axiosInstance"
-import { useNavigate } from "react-router-dom";
+import axios from "../context/axiosInstance";
 import {
   Wallet,
-  User,
+  User as UserIcon,
   Settings,
   LogOut,
   MessageCircle,
   Repeat,
   ScrollText,
+  Plus,
+  Users,
 } from "lucide-react";
 
 const Navbar = () => {
   const { authTokens, logout, user, setUser } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
-
   const menuRef = useRef(null);
 
-  // 🔁 Click έξω για να κλείνει το popup
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -39,7 +38,31 @@ const Navbar = () => {
   const userBalance = user?.balance
     ? user.balance.toFixed(2).replace(".", ",")
     : "0,00";
-  const nickname = user?.nickname || "user";
+
+  const nickname = user?.nickname || user?.username || "Χρήστης";
+
+  // 🔁 Εικονίδια/επιλογές ανά ρόλο
+  const menuItems = {
+    user: [
+      { to: "/bets", label: "Στοιχήματα", icon: <ScrollText size={20} /> },
+      { to: "/transactions", label: "Μεταφορές", icon: <Repeat size={20} /> },
+      { to: "/wallet", label: "Ταμεία", icon: <Wallet size={20} /> },
+      { to: "/settings", label: "Λογαριασμός", icon: <UserIcon size={20} /> },
+      { to: "/preferences", label: "Ρυθμίσεις", icon: <Settings size={20} /> },
+      { to: "/chat", label: "Chat", icon: <MessageCircle size={20} /> },
+    ],
+    cashier: [
+      { to: "/cashier/bets", label: "Στοιχήματα", icon: <ScrollText size={20} /> },
+      { to: "/cashier/transfer", label: "Μεταφορές", icon: <Repeat size={20} /> },
+      { to: "/cashier/balances", label: "Ταμεία", icon: <Wallet size={20} /> },
+      { to: "/cashier/settings", label: "Λογαριασμός", icon: <UserIcon size={20} /> },
+      { to: "/cashier/users", label: "Λίστα Χρηστών", icon: <Users size={20} /> },
+      { to: "/cashier/create-user", label: "Δημιουργία Χρήστη", icon: <Plus size={20} /> },
+      { to: "/cashier/chat", label: "Chat", icon: <MessageCircle size={20} /> },
+    ],
+  };
+
+  const itemsToRender = menuItems[user?.role] || [];
 
   return (
     <nav className="bg-[#1a1f1c] text-white p-4 flex justify-between items-center">
@@ -53,7 +76,7 @@ const Navbar = () => {
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="px-4 py-2 bg-[#2d352e] text-white rounded hover:bg-[#3b443a] transition duration-200 flex items-center gap-2"
           >
-            <User size={18} /> ({userBalance})
+            <UserIcon size={18} /> ({userBalance})
           </button>
 
           {dropdownOpen && (
@@ -85,48 +108,16 @@ const Navbar = () => {
               </div>
 
               <div className="px-2 py-3 grid grid-cols-3 gap-2 text-[#333]">
-                <Link
-                  to="/bets"
-                  className="flex flex-col items-center justify-center gap-1 hover:bg-[#f2f2f2] rounded p-2"
-                >
-                  <ScrollText size={20} />
-                  <span className="text-xs">Στοιχήματα</span>
-                </Link>
-                <Link
-                  to="/transactions"
-                  className="flex flex-col items-center justify-center gap-1 hover:bg-[#f2f2f2] rounded p-2"
-                >
-                  <Repeat size={20} />
-                  <span className="text-xs">Μεταφορές</span>
-                </Link>
-                <Link
-                  to="/wallet"
-                  className="flex flex-col items-center justify-center gap-1 hover:bg-[#f2f2f2] rounded p-2"
-                >
-                  <Wallet size={20} />
-                  <span className="text-xs">Ταμεία</span>
-                </Link>
-                <Link
-                  to="/settings"
-                  className="flex flex-col items-center justify-center gap-1 hover:bg-[#f2f2f2] rounded p-2"
-                >
-                  <User size={20} />
-                  <span className="text-xs">Λογαριασμός</span>
-                </Link>
-                <Link
-                  to="/preferences"
-                  className="flex flex-col items-center justify-center gap-1 hover:bg-[#f2f2f2] rounded p-2"
-                >
-                  <Settings size={20} />
-                  <span className="text-xs">Ρυθμίσεις</span>
-                </Link>
-                <Link
-                  to="/chat"
-                  className="flex flex-col items-center justify-center gap-1 hover:bg-[#f2f2f2] rounded p-2"
-                >
-                  <MessageCircle size={20} />
-                  <span className="text-xs">Chat</span>
-                </Link>
+                {itemsToRender.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className="flex flex-col items-center justify-center gap-1 hover:bg-[#f2f2f2] rounded p-2"
+                  >
+                    {item.icon}
+                    <span className="text-xs whitespace-nowrap text-center">{item.label}</span>
+                  </Link>
+                ))}
               </div>
 
               <div className="border-t border-[#e5e5e5] px-4 py-3">
