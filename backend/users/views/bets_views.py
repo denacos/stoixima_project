@@ -7,7 +7,9 @@ from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 from django.db.models import Sum
+from datetime import datetime
 import requests
+import pytz
 import os
 
 from users.serializers import BetSerializer
@@ -128,22 +130,24 @@ class UserBetHistoryView(generics.ListAPIView):
         status = self.request.query_params.get('status', None)
         if status:
             queryset = queryset.filter(status=status)
-        from_date = self.request.query_params.get('from_date', None)
-        to_date = self.request.query_params.get('to_date', None)
-        if from_date:
-            try:
-                from_date = parse_date(from_date)
-                if from_date:
-                    queryset = queryset.filter(created_at__gte=from_date)
-            except ValueError:
-                pass
-        if to_date:
-            try:
-                to_date = parse_date(to_date)
-                if to_date:
-                    queryset = queryset.filter(created_at__lte=to_date)
-            except ValueError:
-                pass
+
+        from_date = self.request.query_params.get('from_date')
+        to_date = self.request.query_params.get('to_date')
+
+        athens = pytz.timezone('Europe/Athens')
+
+        try:
+            if from_date:
+                from_dt = datetime.fromisoformat(from_date)
+                from_dt_utc = athens.localize(from_dt).astimezone(pytz.UTC)
+                queryset = queryset.filter(created_at__gte=from_dt_utc)
+            if to_date:
+                to_dt = datetime.fromisoformat(to_date)
+                to_dt_utc = athens.localize(to_dt).astimezone(pytz.UTC)
+                queryset = queryset.filter(created_at__lte=to_dt_utc)
+        except Exception as e:
+            print(f"Invalid datetime format: {e}")
+
         return queryset
 
 class UserBetReportView(APIView):

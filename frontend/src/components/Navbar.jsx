@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthProvider";
+import axios from "../context/axiosInstance"
 import {
   Wallet,
   User,
@@ -12,8 +13,7 @@ import {
 } from "lucide-react";
 
 const Navbar = () => {
-  const { authTokens, logout } = useAuth();
-  const user = JSON.parse(localStorage.getItem("user"));
+  const { authTokens, logout, user, setUser } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const menuRef = useRef(null);
@@ -54,7 +54,19 @@ const Navbar = () => {
             <div className="absolute right-0 mt-2 w-[320px] bg-black text-[#1e1e1e] rounded-md shadow-lg z-50 text-sm border border-[#dcdcdc]">
               <div className="px-4 py-3 border-b border-[#e5e5e5]">
                 <div className="font-semibold text-base">{nickname}</div>
-                <div className="text-xs text-[#339966] font-semibold cursor-pointer">
+                <div
+                  className="text-xs text-[#339966] font-semibold cursor-pointer"
+                  onClick={async () => {
+                    try {
+                      const res = await axios.get("/users/user/balance");
+                      const updatedUser = { ...user, balance: res.data.balance };
+                      setUser(updatedUser);
+                      localStorage.setItem("user", JSON.stringify(updatedUser));
+                    } catch (err) {
+                      console.error("Αποτυχία ανανέωσης υπολοίπου:", err);
+                    }
+                  }}
+                >
                   Πορτοφόλια ↻
                 </div>
                 <div className="text-sm font-bold text-[#1e1e1e] mt-1">

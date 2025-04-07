@@ -13,6 +13,7 @@ const Layout = ({ children, onSelectSport }) => {
       id: 1,
       team: 'Πανσερραϊκός',
       market: 'Τελικό Αποτέλεσμα',
+      event: 'Πανσερραϊκός vs Λεβαδιακός',
       odds: 1.72,
       stake: '',
     },
@@ -20,9 +21,26 @@ const Layout = ({ children, onSelectSport }) => {
       id: 2,
       team: 'Φιορεντίνα',
       market: 'Τελικό Αποτέλεσμα',
+      event: 'Φιορεντίνα vs Μίλαν',
       odds: 1.80,
       stake: '',
     },
+    {
+      id: 3,
+      team: 'Μπαρτσελόνα',
+      market: 'Τελικό Αποτέλεσμα',
+      event: 'Μπαρτσελόνα vs Μπέτις',
+      odds: 1.35,
+      stake: '',
+    },
+    {
+      id: 4,
+      team: 'Παρί Σεν Ζερμέν',
+      market: 'Τελικό Αποτέλεσμα',
+      event: 'Παρί Σεν Ζερμέν vs Λιόν',
+      odds: 1.4,
+      stake: '',
+    }
   ]);
   
 

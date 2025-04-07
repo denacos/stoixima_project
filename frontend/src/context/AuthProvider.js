@@ -1,43 +1,57 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import axios from "../context/axiosInstance";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [authTokens, setAuthTokens] = useState(() => ({
-    access: localStorage.getItem("access"),
-    refresh: localStorage.getItem("refreshToken"),
-  }));
-
-  const [user, setUser] = useState(() => {
-    const userData = localStorage.getItem("user");
-    return userData ? JSON.parse(userData) : null;
+  const [authTokens, setAuthTokens] = useState(() => {
+    const access = localStorage.getItem("access");
+    const refresh = localStorage.getItem("refreshToken");
+    return access && refresh ? { access, refresh } : null;
   });
 
-  const login = (access, refresh) => {
-    localStorage.setItem("access", access);
-    localStorage.setItem("refreshToken", refresh);
-    setAuthTokens({ access, refresh });
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    setUser(storedUser);
-  };
+  useEffect(() => {
+    const updateToken = async () => {
+      if (!authTokens?.refresh) return;
+      try {
+        const response = await axios.post("token/refresh/", {
+          refresh: authTokens.refresh,
+        });
+        const newAccess = response.data.access;
+        const updatedTokens = { ...authTokens, access: newAccess };
+        setAuthTokens(updatedTokens);
+        localStorage.setItem("access", newAccess);
+
+        const res = await axios.get("/users/me/");
+        setUser(res.data);
+        localStorage.setItem("user", JSON.stringify(res.data));
+      } catch (err) {
+        console.error("Token refresh failed", err);
+        logout();
+      }
+    };
+
+    const interval = setInterval(updateToken, 1000 * 60 * 4);
+    return () => clearInterval(interval);
+  }, [authTokens]);
 
   const logout = () => {
-    localStorage.clear();
     setAuthTokens(null);
     setUser(null);
+    localStorage.removeItem("access");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
   };
 
-  // Keep user in sync when page reloads
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-
   return (
-    <AuthContext.Provider value={{ authTokens, login, logout, user }}>
+    <AuthContext.Provider
+      value={{ authTokens, setAuthTokens, user, setUser, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
