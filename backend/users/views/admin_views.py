@@ -5,8 +5,10 @@ from rest_framework.response import Response
 from django.db.models import Sum
 from django.utils.dateparse import parse_date
 from users.models import CustomUser, Bet, UserBalance
-from users.serializers import UserSerializer, BetSerializer
+from users.serializers import UserSerializer, BetSerializer, CustomUserSerializer
 from users.permissions import IsAdmin, IsBoss, IsManager, IsCashier
+
+
 
 # --- ADMIN ---
 class AdminUserListView(generics.ListCreateAPIView):
@@ -136,10 +138,12 @@ class ManagerUserBetsReportView(generics.ListAPIView):
 
 # --- CASHIER ---
 class CashierUserListView(generics.ListAPIView):
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated, IsCashier]
+    serializer_class = CustomUserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
     def get_queryset(self):
-        return CustomUser.objects.filter(role="user", cashier=self.request.user)
+        user = self.request.user
+        return CustomUser.objects.filter(cashier=user)
 
 class CashierFinancialReportView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsCashier]

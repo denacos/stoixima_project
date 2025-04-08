@@ -1,5 +1,5 @@
 
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError, PermissionDenied
@@ -9,36 +9,73 @@ from django.contrib.auth import get_user_model
 from users.models import UserBalance, CustomUser, Transaction
 from users.serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.views import TokenObtainPairView
+from users.serializers import CustomTokenObtainPairSerializer
+from users.models import UserBalance
 
 User = get_user_model()
 
-class CreateUserView(generics.CreateAPIView):
-    queryset = User.objects.all()
+class CreateUserView(generics.GenericAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def perform_create(self, serializer):
-        user = self.request.user
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        if not serializer.is_valid():
+            print("❌ Serializer Errors:", serializer.errors)
+            print("📥 Incoming Data:", request.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         role = serializer.validated_data.get("role")
+        creator = request.user
+        
         if role == "manager":
-            if user.role != "boss":
+            if creator.role != "boss":
                 raise PermissionDenied("Only Boss can create a Manager.")
-            serializer.save(boss=user)
+            instance = serializer.save(boss=creator)
+
         elif role == "cashier":
-            if user.role != "manager":
+            if creator.role != "manager":
                 raise PermissionDenied("Only Manager can create a Cashier.")
-            serializer.save(manager=user)
+            instance = serializer.save(manager=creator)
+
         elif role == "user":
-            if user.role != "cashier":
+            if creator.role != "cashier":
                 raise PermissionDenied("Only Cashier can create a User.")
-            serializer.save(cashier=user)
+            instance = serializer.save(cashier=creator)
+
+            initial_balance = request.data.get("balance")
+            if initial_balance:
+                UserBalance.objects.update_or_create(
+                    user=instance,
+                    defaults={"balance": float(initial_balance)}
+                )
         else:
             raise PermissionDenied("Invalid role assignment.")
+
+        return Response({"message": "Ο χρήστης δημιουργήθηκε επιτυχώς."}, status=status.HTTP_201_CREATED)
+        
 
 class UpdateUserView(generics.UpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+class DeleteUserView(generics.DestroyAPIView):
+    queryset = CustomUser.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_destroy(self, instance):
+        # Διαγραφή balance πρώτα, αν υπάρχει
+        try:
+            balance = UserBalance.objects.get(user=instance)
+            balance.delete()
+        except UserBalance.DoesNotExist:
+            pass
+
+        # Τώρα ασφαλής διαγραφή χρήστη
+        instance.delete()
 
 class ListUsersView(generics.ListAPIView):
     queryset = User.objects.all()
@@ -118,3 +155,6 @@ class CurrentUserView(APIView):
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+
+class CustomLoginView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer

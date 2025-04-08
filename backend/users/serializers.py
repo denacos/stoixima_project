@@ -7,18 +7,20 @@ from users.models import CustomUser  # Αν χρησιμοποιείς custom us
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
+    balance = serializers.FloatField(write_only=True, required=False)
+
     class Meta:
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
             'country', 'phone_number', 'birth_date',
-            'role', 'password', 'boss', 'manager', 'cashier' ]      
+            'role', 'password', 'boss', 'manager', 'cashier', 'balance' ]      
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        role = validated_data.get("role")
-
+        balance = validated_data.pop("balance", None)
         # Επιλογή του σωστού Parent User ανάλογα με το ρόλο
+        role = validated_data.get("role")
         if role == "manager" and "boss" not in validated_data:
             raise serializers.ValidationError("A manager must have a boss.")
         if role == "cashier" and "manager" not in validated_data:
@@ -27,6 +29,13 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("A user must have a cashier.")
 
         user = User.objects.create_user(**validated_data)
+
+        if balance is not None:
+            UserBalance.objects.update_or_create(
+                user=user,
+                defaults={"balance": float(balance)}
+            )
+
         return user
 
 class BetSerializer(serializers.ModelSerializer):
@@ -56,9 +65,19 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
 
 class CustomUserSerializer(serializers.ModelSerializer):
+    balance = serializers.SerializerMethodField()
+    date_joined = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'role']
+        fields = ['id', 'username', 'email', 'role', 'balance', 'date_joined']
+
+    def get_balance(self, obj):
+        try:
+            balance = UserBalance.objects.get(user=obj)
+            return round(balance.balance, 2)
+        except UserBalance.DoesNotExist:
+            return 0.00
 
 
 class TransferUnitsSerializer(serializers.Serializer):

@@ -16,6 +16,7 @@ import Dashboard from "./settings/Dashboard";
 import ChatPage from "./settings/ChatPage";
 import PreferencesPage from "./settings/PreferencesPage";
 import CashierUsers from "./settings/AboutCashier/CashierUsers";
+import CashierCreateUser from "./settings/AboutCashier/CashierCreateUser";
 
 import LiveGames from "./sports/LiveGames";
 import MatchesPage from "./sports/MatchesPage";
@@ -86,8 +87,9 @@ const PrivateRoutes = ({ addBet }) => {
           
           {/* Cashier-only routes μέσα από dropdown */}
           <Route path="cashier/users" element={<CashierUsers />} />
-          {/* <Route path="cashier/transfer" element={<CashierTransfer />} />
           <Route path="cashier/create-user" element={<CashierCreateUser />} />
+          {/* <Route path="cashier/transfer" element={<CashierTransfer />} />
+          
           <Route path="cashier/settings" element={<CashierSettings />} />
           <Route path="cashier/chat" element={<CashierChat />} />
           <Route path="cashier/balances" element={<CashierBalances />} />

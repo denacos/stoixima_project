@@ -17,6 +17,7 @@ from .users_views import (
     TransferUnitsView,
     TransactionHistoryView,
     CurrentUserView,
+    DeleteUserView
 )
 
 from .admin_views import (

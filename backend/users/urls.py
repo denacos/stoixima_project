@@ -3,7 +3,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.authtoken.views import obtain_auth_token  # Για login με token
 from .views import ChangePasswordView
 from .views import (
-    CustomLoginView, CreateUserView, ListUsersView, AdminUserListView, BossManagerListView,
+    CustomLoginView, CreateUserView, DeleteUserView, ListUsersView, AdminUserListView, BossManagerListView,
     ManagerCashierListView, CashierUserListView, PlaceBetView,
       SettleBetsView, UserBetHistoryView, CashoutBetView, UserBetReportView, AdminBetReportView,
       AdminDashboardView, BossCashierListView, BossUserListView, BossFinancialReportView,
@@ -14,6 +14,7 @@ from .views import (
 
 urlpatterns = [
     path('create/', CreateUserView.as_view(), name='create-user'),
+    path('delete/<int:pk>/', DeleteUserView.as_view(), name='delete-user'),
     path('list/', ListUsersView.as_view(), name='list-users'),
     path('admin/', AdminUserListView.as_view(), name='admin-users'),
     path('boss/managers/', BossManagerListView.as_view(), name='boss-managers'),
@@ -38,7 +39,7 @@ urlpatterns = [
     path('update/<int:pk>/', UpdateUserView.as_view(), name='update-user'),
     path("api/login/", obtain_auth_token, name="api_login"),  # ✅ Προσθήκη login με token
     path("users/", ListUsersView.as_view(), name="list-users"),  # Παράδειγμα
-    path("token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),  # ✅ Login με JWT
+    path("token/", CustomLoginView.as_view(), name="token_obtain_pair"),  # ✅ Login με JWT
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),  # ✅ Refresh Token
     path('transfer/', TransferUnitsView.as_view(), name='transfer_units'),
     path('transactions/history/', TransactionHistoryView.as_view(), name='transaction-history'),
