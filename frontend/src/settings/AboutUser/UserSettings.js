@@ -51,12 +51,12 @@ const UserSettings = () => {
               <div className="border p-2 rounded bg-gray-50">{userData.username}</div>
             </div>
             <div>
-              <label className="text-gray-600 font-medium">Email</label>
-              <div className="border p-2 rounded bg-gray-50">{userData.email || "-"}</div>
-            </div>
-            <div>
               <label className="text-gray-600 font-medium">Ρόλος</label>
               <div className="border p-2 rounded bg-gray-50">{userData.role}</div>
+            </div>
+            <div>
+              <label className="text-gray-600 font-medium">Υπολοιπο</label>
+              <div className="border p-2 rounded bg-gray-50">{userData.balance || "-"}</div>
             </div>
           </div>
         ) : (

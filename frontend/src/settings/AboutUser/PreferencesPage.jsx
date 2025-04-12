@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios from "../../context/axiosInstance";
+
 
 const PreferencesPage = () => {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -13,19 +14,12 @@ const PreferencesPage = () => {
 
   const handlePasswordChange = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/users/change-password/",
-        {
-          current_password: currentPassword,
-          new_password: newPassword,
-          confirm_password: confirmPassword,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.post("/users/change-password/", {
+        current_password: currentPassword,
+        new_password: newPassword,
+        confirm_password: confirmPassword,
+      });
+      
       setMessage(response.data.message);
       setError("");
     } catch (err) {
@@ -37,14 +31,7 @@ const PreferencesPage = () => {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Ρυθμίσεις</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Two Factor Auth */}
-        <div>
-          <h2 className="text-lg font-semibold mb-2">Έλεγχος ταυτότητας δύο παραγόντων (2FA):</h2>
-          <p className="text-red-600 font-bold">Απενεργοποιημένο</p>
-          <button className="mt-2 px-4 py-2 bg-green-700 text-white rounded">Ρύθμιση 2FA</button>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Change Password */}
         <div>
           <h2 className="text-lg font-semibold mb-2">🔒 Αλλαγή κωδικού πρόσβασης</h2>

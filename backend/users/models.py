@@ -14,7 +14,6 @@ class CustomUser(AbstractUser):
         BOSS = 'boss', 'Boss'
         ADMIN = 'admin', 'Admin'
 
-    email = models.EmailField(max_length=100, blank=True, unique=True)
     role = models.CharField(max_length=20, choices=UserRoles.choices)
     
     # Ιεραρχία χρηστών

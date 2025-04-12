@@ -12,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'username', 'email', 'first_name', 'last_name',
+            'id', 'username', 'first_name', 'last_name',
             'country', 'phone_number', 'birth_date',
             'role', 'password', 'boss', 'manager', 'cashier', 'balance' ]      
         extra_kwargs = {'password': {'write_only': True}}
@@ -67,10 +67,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class CustomUserSerializer(serializers.ModelSerializer):
     balance = serializers.SerializerMethodField()
     date_joined = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+    manager = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'role', 'balance', 'date_joined']
+        fields = ['id', 'username', 'role', 'balance', 'date_joined', 'manager']
 
     def get_balance(self, obj):
         try:
@@ -78,6 +79,15 @@ class CustomUserSerializer(serializers.ModelSerializer):
             return round(balance.balance, 2)
         except UserBalance.DoesNotExist:
             return 0.00
+
+    def get_manager(self, obj):
+        if obj.manager:
+            return {
+                "id": obj.manager.id,
+                "username": obj.manager.username
+            }
+        return None
+
 
 
 class TransferUnitsSerializer(serializers.Serializer):

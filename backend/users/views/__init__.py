@@ -14,6 +14,8 @@ from .users_views import (
     UpdateUserView,
     ListUsersView,
     UserBalanceView,
+    CashierTransferView,
+    CashierTransactionHistoryView,
     TransferUnitsView,
     TransactionHistoryView,
     CurrentUserView,

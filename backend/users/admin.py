@@ -26,12 +26,12 @@ class CustomUserAdmin(UserAdmin):
         ('Additional Info', {'fields': ('role', 'boss', 'manager', 'cashier')}),
     )
     add_fieldsets = UserAdmin.add_fieldsets + (
-        ('Additional Info', {'fields': ('email', 'role', 'boss', 'manager', 'cashier')}),
+        ('Additional Info', {'fields': ('role', 'boss', 'manager', 'cashier')}),
     )
     
-    list_display = ('username', 'email', 'get_role_display', 'boss', 'manager', 'cashier', 'is_staff', 'is_superuser')
+    list_display = ('username', 'get_role_display', 'boss', 'manager', 'cashier', 'is_staff', 'is_superuser')
     list_filter = ('role', 'is_staff', 'is_superuser', 'boss', 'manager', 'cashier')
-    search_fields = ('username', 'email', 'role')
+    search_fields = ('username', 'role')
 
     def get_role_display(self, obj):
         """ Επιστρέφει την ονομασία του ρόλου αντί για το raw value """

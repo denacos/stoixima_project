@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.authtoken.views import obtain_auth_token  # Για login με token
-from .views import ChangePasswordView
+from .views import ChangePasswordView, auth_views
 from .views import (
     CustomLoginView, CreateUserView, DeleteUserView, ListUsersView, AdminUserListView, BossManagerListView,
     ManagerCashierListView, CashierUserListView, PlaceBetView,
@@ -9,7 +9,7 @@ from .views import (
       AdminDashboardView, BossCashierListView, BossUserListView, BossFinancialReportView,
      ManagerUserListView, ManagerFinancialReportView, CashierFinancialReportView,  UserBalanceView,
     CashierUserBetsReportView, ManagerUserBetsReportView, UpdateUserView, TransferUnitsView,
-     TransactionHistoryView, FinancialReportsView, GetBetSlipView, CurrentUserView,
+     TransactionHistoryView, FinancialReportsView, GetBetSlipView, CurrentUserView, CashierTransferView, CashierTransactionHistoryView
 )
 
 urlpatterns = [
@@ -26,7 +26,9 @@ urlpatterns = [
     path('manager/financial-report/', ManagerFinancialReportView.as_view(), name='manager-financial-report'),
     path('manager/user-bets/', ManagerUserBetsReportView.as_view(), name='manager-user-bets'),
     path('cashier/users/', CashierUserListView.as_view(), name='cashier-users'),
-    path('cashier/user-bets/', CashierUserBetsReportView.as_view(), name='cashier-user-bets'),    
+    path('cashier/user-bets/', CashierUserBetsReportView.as_view(), name='cashier-user-bets'),   
+    path('cashier/transfer/', CashierTransferView.as_view(), name='cashier-transfer'),
+    path("cashier/transactions/", CashierTransactionHistoryView.as_view(), name="cashier-transactions"), 
     path('cashier/financial-report/', CashierFinancialReportView.as_view(), name='cashier-financial-report'),
     path('bets/settle/', SettleBetsView.as_view(), name='settle-bets'),
     path('bets/history/', UserBetHistoryView.as_view(), name='bet-history'),
@@ -48,4 +50,6 @@ urlpatterns = [
     path('bets/place/', PlaceBetView.as_view(), name='place-bet'),  # ✅ Εξασφάλισε ότι υπάρχει
     path('me/', CurrentUserView.as_view(), name='current-user'),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
+    path("change-password-of/<int:pk>/", auth_views.change_user_password),
+
 ]

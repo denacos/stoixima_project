@@ -11,12 +11,14 @@ import Unauthorized from "./components/Unauthorized";
 import UserBets from "./settings/AboutUser/UserBets";
 import UserSettings from "./settings/AboutUser/UserSettings";
 import WalletPage from "./settings/AboutUser/WalletPage";
-import Transactions from "./settings/Transactions";
+import Transactions from "./settings/AboutUser/Transactions";
 import Dashboard from "./settings/Dashboard";
 import ChatPage from "./settings/ChatPage";
-import PreferencesPage from "./settings/PreferencesPage";
+import PreferencesPage from "./settings/AboutUser/PreferencesPage";
 import CashierUsers from "./settings/AboutCashier/CashierUsers";
 import CashierCreateUser from "./settings/AboutCashier/CashierCreateUser";
+import CashierTransfer from "./settings/AboutCashier/CashierTransfer";
+import CashierSettings from "./settings/AboutCashier/CashierSettings";
 
 import LiveGames from "./sports/LiveGames";
 import MatchesPage from "./sports/MatchesPage";
@@ -88,9 +90,9 @@ const PrivateRoutes = ({ addBet }) => {
           {/* Cashier-only routes μέσα από dropdown */}
           <Route path="cashier/users" element={<CashierUsers />} />
           <Route path="cashier/create-user" element={<CashierCreateUser />} />
-          {/* <Route path="cashier/transfer" element={<CashierTransfer />} />
-          
+          <Route path="cashier/transfer" element={<CashierTransfer />} />
           <Route path="cashier/settings" element={<CashierSettings />} />
+          {/*
           <Route path="cashier/chat" element={<CashierChat />} />
           <Route path="cashier/balances" element={<CashierBalances />} />
           <Route path="cashier/bets" element={<CashierBets />} /> */}
