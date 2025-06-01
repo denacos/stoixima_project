@@ -19,6 +19,7 @@ import CashierUsers from "./settings/AboutCashier/CashierUsers";
 import CashierCreateUser from "./settings/AboutCashier/CashierCreateUser";
 import CashierTransfer from "./settings/AboutCashier/CashierTransfer";
 import CashierSettings from "./settings/AboutCashier/CashierSettings";
+import CashierBalances from "./settings/AboutCashier/CashierBalances";
 
 import LiveGames from "./sports/LiveGames";
 import MatchesPage from "./sports/MatchesPage";
@@ -92,9 +93,10 @@ const PrivateRoutes = ({ addBet }) => {
           <Route path="cashier/create-user" element={<CashierCreateUser />} />
           <Route path="cashier/transfer" element={<CashierTransfer />} />
           <Route path="cashier/settings" element={<CashierSettings />} />
+          <Route path="cashier/balances" element={<CashierBalances />} />
           {/*
           <Route path="cashier/chat" element={<CashierChat />} />
-          <Route path="cashier/balances" element={<CashierBalances />} />
+          
           <Route path="cashier/bets" element={<CashierBets />} /> */}
         </Route>
       )}

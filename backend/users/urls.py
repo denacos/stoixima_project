@@ -5,11 +5,12 @@ from .views import ChangePasswordView, auth_views
 from .views import (
     CustomLoginView, CreateUserView, DeleteUserView, ListUsersView, AdminUserListView, BossManagerListView,
     ManagerCashierListView, CashierUserListView, PlaceBetView,
-      SettleBetsView, UserBetHistoryView, CashoutBetView, UserBetReportView, AdminBetReportView,
-      AdminDashboardView, BossCashierListView, BossUserListView, BossFinancialReportView,
-     ManagerUserListView, ManagerFinancialReportView, CashierFinancialReportView,  UserBalanceView,
+    SettleBetsView, UserBetHistoryView, CashoutBetView, UserBetReportView, AdminBetReportView,
+    AdminDashboardView, BossCashierListView, BossUserListView, BossFinancialReportView,
+    ManagerUserListView, ManagerFinancialReportView, CashierFinancialReportView,  UserBalanceView,
     CashierUserBetsReportView, ManagerUserBetsReportView, UpdateUserView, TransferUnitsView,
-     TransactionHistoryView, FinancialReportsView, GetBetSlipView, CurrentUserView, CashierTransferView, CashierTransactionHistoryView
+    TransactionHistoryView, FinancialReportsView, GetBetSlipView, CurrentUserView, CashierTransferView,
+    CashierTransactionHistoryView, CashierBalancesView
 )
 
 urlpatterns = [
@@ -26,7 +27,8 @@ urlpatterns = [
     path('manager/financial-report/', ManagerFinancialReportView.as_view(), name='manager-financial-report'),
     path('manager/user-bets/', ManagerUserBetsReportView.as_view(), name='manager-user-bets'),
     path('cashier/users/', CashierUserListView.as_view(), name='cashier-users'),
-    path('cashier/user-bets/', CashierUserBetsReportView.as_view(), name='cashier-user-bets'),   
+    path('cashier/user-bets/', CashierUserBetsReportView.as_view(), name='cashier-user-bets'),
+    path("cashier/balances/", CashierBalancesView.as_view(), name="cashier-balances"),   
     path('cashier/transfer/', CashierTransferView.as_view(), name='cashier-transfer'),
     path("cashier/transactions/", CashierTransactionHistoryView.as_view(), name="cashier-transactions"), 
     path('cashier/financial-report/', CashierFinancialReportView.as_view(), name='cashier-financial-report'),
@@ -39,15 +41,15 @@ urlpatterns = [
     path('user/balance/', UserBalanceView.as_view(), name='user-balance'),
     path('user/bets/', UserBetHistoryView.as_view(), name='user-bets'),
     path('update/<int:pk>/', UpdateUserView.as_view(), name='update-user'),
-    path("api/login/", obtain_auth_token, name="api_login"),  # ✅ Προσθήκη login με token
-    path("users/", ListUsersView.as_view(), name="list-users"),  # Παράδειγμα
-    path("token/", CustomLoginView.as_view(), name="token_obtain_pair"),  # ✅ Login με JWT
-    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),  # ✅ Refresh Token
+    path("api/login/", obtain_auth_token, name="api_login"), 
+    path("users/", ListUsersView.as_view(), name="list-users"),  
+    path("token/", CustomLoginView.as_view(), name="token_obtain_pair"),  
+    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),  
     path('transfer/', TransferUnitsView.as_view(), name='transfer_units'),
     path('transactions/history/', TransactionHistoryView.as_view(), name='transaction-history'),
     path('financial-reports/', FinancialReportsView.as_view(), name='financial-reports'),
     path('bets/slip/', GetBetSlipView.as_view(), name='get-bet-slip'),
-    path('bets/place/', PlaceBetView.as_view(), name='place-bet'),  # ✅ Εξασφάλισε ότι υπάρχει
+    path('bets/place/', PlaceBetView.as_view(), name='place-bet'),  
     path('me/', CurrentUserView.as_view(), name='current-user'),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
     path("change-password-of/<int:pk>/", auth_views.change_user_password),

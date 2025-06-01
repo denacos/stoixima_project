@@ -12,7 +12,7 @@ from users.serializers import UserSerializer, CustomUserSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from users.serializers import CustomTokenObtainPairSerializer
-from users.models import UserBalance
+from users.models import Bet, UserBalance
 
 User = get_user_model()
 
@@ -77,8 +77,7 @@ class CreateUserView(generics.GenericAPIView):
         else:
             raise PermissionDenied("Invalid role assignment.")
 
-        return Response({"message": "Ο χρήστης δημιουργήθηκε επιτυχώς."}, status=status.HTTP_201_CREATED)
-        
+        return Response({"message": "Ο χρήστης δημιουργήθηκε επιτυχώς."}, status=status.HTTP_201_CREATED)        
 
 class UpdateUserView(generics.UpdateAPIView):
     queryset = User.objects.all()
@@ -114,7 +113,6 @@ class DeleteUserView(generics.DestroyAPIView):
 
         # Τώρα διαγραφή χρήστη
         instance.delete()
-
 
 class ListUsersView(generics.ListAPIView):
     queryset = User.objects.all()
@@ -170,9 +168,6 @@ class CashierTransferView(APIView):
         return Response({
             "message": f"Επιτυχής {transfer_type} ποσού €{amount} στον χρήστη {user.username}."
         }, status=200)
-
-
-from django.db import models
 
 class CashierTransactionHistoryView(APIView):
     permission_classes = [IsAuthenticated]
@@ -233,7 +228,51 @@ class CashierTransactionHistoryView(APIView):
 
         return Response(history)
 
+class CashierBalancesView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        user = request.user  # cashiers only view their users' balances
+
+        # Get filter date range (from_date, to_date)
+        from_date = request.query_params.get("from_date")
+        to_date = request.query_params.get("to_date")
+
+        # Fetch all users under the cashier
+        users = User.objects.filter(cashier=user)
+
+        data = []
+
+        for u in users:
+            user_balance = UserBalance.objects.get(user=u)
+            total_bets = Bet.objects.filter(user=u).aggregate(total_stake=Sum("stake"))["total_stake"] or 0
+            total_winnings = Bet.objects.filter(user=u, status="won").aggregate(total_winnings=Sum("potential_payout"))["total_winnings"] or 0
+            total_losses = total_bets - total_winnings
+
+            # Calculate Mixed (Gross - Stakes)
+            mixed = total_winnings - total_bets
+
+            # Calculate commission (20% for now)
+            commission = 0.2
+
+            # Calculate owed commission (100% - commission %)
+            owed_commission = (100 - 20) / 100 * mixed
+
+            # Calculate net (commission * mixed)
+            net = commission * mixed
+
+            data.append({
+                "user": u.username,
+                "total_bets": total_bets,
+                "total_winnings": total_winnings,
+                "total_losses": total_losses,
+                "mixed": mixed,
+                "commission": commission,
+                "owed_commission": owed_commission,
+                "net": net,
+            })
+
+        return Response(data)
 
 class TransferUnitsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -299,7 +338,6 @@ class TransactionHistoryView(APIView):
         ]
         return Response({"history": history})
 
-
 class FinancialReportsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -318,9 +356,8 @@ class FinancialReportsView(APIView):
             })
         return Response(reports)
 
-
 class CurrentUserView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         serializer = CustomUserSerializer(request.user)
