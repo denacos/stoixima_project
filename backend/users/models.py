@@ -36,6 +36,11 @@ class Bet(models.Model):
         ('lost', 'Χαμένο'),
         ('cashed_out', 'Cashout'),
     ]
+    BET_TYPE_CHOICES = [
+        ('single', 'Μονό'),
+        ('combo', 'Παρολί'),
+        ('system', 'Σύστημα'),
+    ]
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)  # ✅ Χρησιμοποιούμε CustomUser!
     match_id = models.CharField(max_length=100)
@@ -44,6 +49,7 @@ class Bet(models.Model):
     stake = models.FloatField()
     potential_payout = models.FloatField()
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='open')
+    type = models.CharField(max_length=10, choices=BET_TYPE_CHOICES, default='single')
     created_at = models.DateTimeField(auto_now_add=True)
     cashed_out_amount = models.FloatField(null=True, blank=True)
 

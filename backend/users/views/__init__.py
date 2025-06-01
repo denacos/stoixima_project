@@ -14,13 +14,20 @@ from .users_views import (
     UpdateUserView,
     ListUsersView,
     UserBalanceView,
-    CashierBalancesView,
-    CashierTransferView,
-    CashierTransactionHistoryView,
+    
     TransferUnitsView,
     TransactionHistoryView,
     CurrentUserView,
     DeleteUserView
+)
+
+from .cashiers_views import (
+    CashierBalancesView,
+    CashierTransferView,
+    CashierTransactionHistoryView,
+    CashierUserBetsReportView,
+    CashierUserListView,
+    CashierFinancialReportView,
 )
 
 from .admin_views import (
@@ -30,14 +37,12 @@ from .admin_views import (
     BossManagerListView,
     BossCashierListView,
     BossUserListView,
-    BossFinancialReportView,
-    CashierUserBetsReportView,
+    BossFinancialReportView,    
     ManagerCashierListView,
     ManagerUserListView,
     ManagerUserBetsReportView,
     ManagerFinancialReportView,
-    CashierUserListView,
-    CashierFinancialReportView,
+    
 )
 
 from .auth_views import (

@@ -1,4 +1,3 @@
-
 from rest_framework import generics, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -115,54 +114,6 @@ class ManagerUserBetsReportView(generics.ListAPIView):
     def get_queryset(self):
         manager = self.request.user
         queryset = Bet.objects.filter(user__cashier__manager=manager).order_by('-created_at')
-        status = self.request.query_params.get('status', None)
-        if status:
-            queryset = queryset.filter(status=status)
-        from_date = self.request.query_params.get('from_date', None)
-        to_date = self.request.query_params.get('to_date', None)
-        if from_date:
-            try:
-                from_date = parse_date(from_date)
-                if from_date:
-                    queryset = queryset.filter(created_at__gte=from_date)
-            except ValueError:
-                pass
-        if to_date:
-            try:
-                to_date = parse_date(to_date)
-                if to_date:
-                    queryset = queryset.filter(created_at__lte=to_date)
-            except ValueError:
-                pass
-        return queryset
-
-# --- CASHIER ---
-class CashierUserListView(generics.ListAPIView):
-    serializer_class = CustomUserSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        return CustomUser.objects.filter(cashier=user)
-
-class CashierFinancialReportView(APIView):
-    permission_classes = [permissions.IsAuthenticated, IsCashier]
-    def get(self, request):
-        users = CustomUser.objects.filter(cashier=request.user, role="user")
-        report = []
-        for user in users:
-            report.append({
-                "user": user.username,
-                "balance": user.userbalance.balance
-            })
-        return Response(report)
-
-class CashierUserBetsReportView(generics.ListAPIView):
-    serializer_class = BetSerializer
-    permission_classes = [permissions.IsAuthenticated, IsCashier]
-    def get_queryset(self):
-        cashier = self.request.user
-        queryset = Bet.objects.filter(user__cashier=cashier).order_by('-created_at')
         status = self.request.query_params.get('status', None)
         if status:
             queryset = queryset.filter(status=status)
